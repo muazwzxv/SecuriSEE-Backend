@@ -2,6 +2,7 @@ package database
 
 import (
 	"Oracle-Hackathon-BE/config"
+	"Oracle-Hackathon-BE/model"
 	"fmt"
 
 	"gorm.io/driver/mysql"
@@ -30,7 +31,9 @@ func Connect() (*GormInstance, error) {
 		return nil, err
 	} else {
 		// Migrate all tables
-		db.Debug().AutoMigrate()
+		db.Debug().AutoMigrate(
+			&model.User{},
+		)
 		GORM = &GormInstance{
 			orm: db,
 		}
