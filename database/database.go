@@ -1,14 +1,12 @@
 package database
 
-import "gorm.io/gorm"
+import (
+	"Oracle-Hackathon-BE/config"
+	"fmt"
 
-type DatabaseConfig struct {
-	User         string
-	Password     string
-	Host         string
-	Port         int
-	DatabaseName string
-}
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+)
 
 type GormInstance struct {
 	orm *gorm.DB
@@ -18,6 +16,25 @@ var (
 	GORM = &GormInstance{}
 )
 
-func (g *GormInstance) Connect() *GormInstance {
-	return &GormInstance{}
+func Connect() (*GormInstance, error) {
+	config := config.CFG.FetchDatabaseConfig()
+	dsn := fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
+		config.User,
+		config.Password,
+		config.Host,
+		config.Port,
+		config.DatabaseName,
+	)
+
+	if db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{}); err != nil {
+		return nil, err
+	} else {
+		// Migrate all tables
+		db.Debug().AutoMigrate()
+		GORM = &GormInstance{
+			orm: db,
+		}
+
+		return GORM, nil
+	}
 }
