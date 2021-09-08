@@ -1,0 +1,4 @@
+.idea
+config.yml
+.DS_Store
+*.code-workspace
