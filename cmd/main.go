@@ -10,4 +10,5 @@ func main() {
 
 	config := config.New()
 	fmt.Println(config.ReadEnv("Database.Password"))
+	fmt.Println("Hello what the fuck")
 }
