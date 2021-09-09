@@ -18,6 +18,7 @@ func main() {
 	// Connect to database
 	service.ConnectDatabase()
 
+	// Load all app configs
 	app := setup()
 
 	app.Listen(":8080")
