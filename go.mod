@@ -4,10 +4,12 @@ go 1.16
 
 require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gofiber/fiber/v2 v2.18.0 // indirect
+	github.com/gofiber/jwt/v3 v3.0.2 // indirect
 	github.com/klauspost/compress v1.13.5 // indirect
 	github.com/spf13/viper v1.8.1 // indirect
-	golang.org/x/sys v0.0.0-20210908160347-a851e7ddeee0 // indirect
+	golang.org/x/sys v0.0.0-20210908233432-aa78b53d3365 // indirect
 	gorm.io/driver/mysql v1.1.2 // indirect
 	gorm.io/gorm v1.21.14 // indirect
 )

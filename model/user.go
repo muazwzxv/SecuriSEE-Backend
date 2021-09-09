@@ -12,7 +12,7 @@ type User struct {
 	Email string `gorm:"not null"`
 	Phone string `gorm:"not null"`
 	Ic    string `gorm:"not null"`
-	Role  string
+	Role  []string
 
 	CreatedAt time.Time `gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt

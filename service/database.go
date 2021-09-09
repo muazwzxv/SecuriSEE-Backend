@@ -1,4 +1,4 @@
-package database
+package service
 
 import (
 	"Oracle-Hackathon-BE/config"
@@ -17,7 +17,7 @@ var (
 	GORM = &GormInstance{}
 )
 
-func Connect() (*GormInstance, error) {
+func ConnectDatabase() (*GormInstance, error) {
 	config := config.CFG.FetchDatabaseConfig()
 	dsn := fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
 		config.User,
