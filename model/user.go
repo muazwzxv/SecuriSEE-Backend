@@ -5,19 +5,53 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type User struct {
-	ID    uuid.UUID `gorm:"type:uuid:default:uuid_generate_v4()"`
-	Name  string    `gorm:"not null"`
-	Email string    `gorm:"not null"`
-	Phone string    `gorm:"not null"`
-	Ic    string    `gorm:"not null"`
-	Role  string    `gorm:"not null"`
+	ID       uuid.UUID `gorm:"type:uuid:default:uuid_generate_v4()"`
+	Ic       string    `gorm:"index"`
+	Name     string    `gorm:"not null"`
+	Phone    string    `gorm:"not null"`
+	Email    string
+	Role     string `gorm:"not null"`
+	Password string `gorm:"not null"`
 
 	CreatedAt time.Time `gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt
+}
+
+// sql wrapper
+
+func (u *User) Create(gorm *gorm.DB) error {
+	if err := gorm.Debug().Create(u).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+// Helpers
+
+func (u *User) CheckEmailExits(gorm *gorm.DB) bool {
+	if res := gorm.Debug().Where("email = ?", u.Email).First(u); res != nil && res.RowsAffected == 0 {
+		return false
+	} else {
+		return true
+	}
+}
+
+func (u *User) HashPassword(p string) {
+	if bytes, err := bcrypt.GenerateFromPassword([]byte(p), 14); err != nil {
+		panic(err)
+	} else {
+		u.Password = string(bytes)
+	}
+}
+
+func (u *User) CheckHash(pass string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(pass))
+	return err == nil
 }
 
 func (u *User) isRoleExist(role string) bool {
@@ -28,7 +62,6 @@ func (u *User) isRoleExist(role string) bool {
 			return true
 		}
 	}
-
 	return false
 }
 

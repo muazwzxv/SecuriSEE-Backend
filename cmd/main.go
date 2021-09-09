@@ -4,6 +4,7 @@ import (
 	"Oracle-Hackathon-BE/config"
 	"Oracle-Hackathon-BE/service"
 	"fmt"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v3"
@@ -11,6 +12,13 @@ import (
 
 func main() {
 	fmt.Println("Application boot up")
+
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("Recovering")
+			log.Printf("\n Error was %v", r)
+		}
+	}()
 
 	// load configuration file
 	config.New()
