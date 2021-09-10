@@ -23,8 +23,11 @@ type User struct {
 	DeletedAt gorm.DeletedAt
 }
 
-func (u *User) BeforeCreate(scope *gorm.DB) {
-	scope.Statement.SetColumn("ID", uuid.NewV4())
+// Gorm hooks
+func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
+	uuid := uuid.NewV4()
+	u.ID = uuid
+	return
 }
 
 // sql wrapper

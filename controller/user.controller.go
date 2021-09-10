@@ -52,6 +52,7 @@ func (userRepository *UserRepository) CreateUser(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
 			"Success": false,
 			"Message": "Something wrong happened",
+			"Error":   err.Error(),
 		})
 	}
 

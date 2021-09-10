@@ -37,23 +37,13 @@ func setup(gorm *gorm.DB) *fiber.App {
 
 	// Unauthenticated routes go here
 	userRepository := controller.NewUserController(gorm)
-	v1.Post("/user", JwtMiddleware(), userRepository.CreateUser)
+	v1.Post("/user", userRepository.CreateUser)
 	v1.Get("/", func(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusAccepted).JSON(fiber.Map{
 			"Success": true,
 			"Message": "Welcome to our endpoint bitch",
 		})
 	})
-
-	v1.Use(jwtware.New(jwtware.Config{
-		ErrorHandler: func(c *fiber.Ctx, e error) error {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"Message": "Unauthorized",
-				"Error":   e,
-			})
-		},
-		SigningKey: []byte(config.CFG.GetJWTSecret()),
-	}))
 
 	// Authenticated routes go here
 
@@ -65,7 +55,7 @@ func JwtMiddleware() fiber.Handler {
 		ErrorHandler: func(c *fiber.Ctx, e error) error {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"Message": "Unauthorized",
-				"Error":   e,
+				"Error":   e.Error(),
 			})
 		},
 		SigningKey: []byte(config.CFG.GetJWTSecret()),
