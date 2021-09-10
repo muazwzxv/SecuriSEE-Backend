@@ -45,12 +45,9 @@ func setupRouter(gorm *gorm.DB, app *fiber.App) {
 
 	userRepository := controller.NewUserController(gorm)
 	v1.Post("/user", userRepository.CreateUser)
-	v1.Get("/", func(ctx *fiber.Ctx) error {
-		return ctx.Status(http.StatusAccepted).JSON(fiber.Map{
-			"Success": true,
-			"Message": "Welcome to our endpoint bitch",
-		})
-	})
+
+	v1.Get("/", testEndpoint)
+	v1.Get("/guarded", JwtMiddleware(), guaredEndpoint)
 
 	v1.Get("/panic", func(ctx *fiber.Ctx) error {
 		panic("Panic testing")
@@ -66,5 +63,19 @@ func JwtMiddleware() fiber.Handler {
 			})
 		},
 		SigningKey: []byte(config.CFG.GetJWTSecret()),
+	})
+}
+
+func testEndpoint(ctx *fiber.Ctx) error {
+	return ctx.Status(http.StatusAccepted).JSON(fiber.Map{
+		"Success": true,
+		"Message": "Welcome to Not guarded endpoint",
+	})
+}
+
+func guaredEndpoint(ctx *fiber.Ctx) error {
+	return ctx.Status(http.StatusAccepted).JSON(fiber.Map{
+		"Success": true,
+		"Message": "Welcome to Guarded guarded endpoint",
 	})
 }
