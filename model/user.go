@@ -88,7 +88,7 @@ func (u *User) IsRoleExist(role string) bool {
 	return false
 }
 
-func (u *User) RolesToString(roles []string) string {
+func (u *User) RolesToString(roles []string) {
 	// use this to serialize slice string to string
-	return strings.Join(roles, ", ")
+	u.Role = strings.Join(roles, ", ")
 }

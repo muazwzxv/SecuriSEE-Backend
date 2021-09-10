@@ -46,6 +46,8 @@ func (userRepository *UserRepository) CreateUser(ctx *fiber.Ctx) error {
 	// Hash password
 	user.HashPassword(user.Password)
 
+	user.RolesToString([]string{"user", "admin"})
+
 	// Create user
 	err := user.Create(userRepository.gorm)
 	if err != nil {
