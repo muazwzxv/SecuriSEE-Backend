@@ -33,8 +33,16 @@ func (u *User) Create(gorm *gorm.DB) error {
 
 // Helpers
 
-func (u *User) CheckEmailExits(gorm *gorm.DB) bool {
+func (u *User) IsEmailExist(gorm *gorm.DB) bool {
 	if res := gorm.Debug().Where("email = ?", u.Email).First(u); res != nil && res.RowsAffected == 0 {
+		return false
+	} else {
+		return true
+	}
+}
+
+func (u *User) IsICExist(gorm *gorm.DB) bool {
+	if res := gorm.Debug().Where("ic = ?", u.Ic).First(u); res != nil && res.RowsAffected == 0 {
 		return false
 	} else {
 		return true
@@ -54,7 +62,7 @@ func (u *User) CheckHash(pass string) bool {
 	return err == nil
 }
 
-func (u *User) isRoleExist(role string) bool {
+func (u *User) IsRoleExist(role string) bool {
 
 	split := strings.Split(u.Role, ",")
 	for _, val := range split {
@@ -65,7 +73,7 @@ func (u *User) isRoleExist(role string) bool {
 	return false
 }
 
-func (u *User) rolesToString(roles []string) string {
+func (u *User) RolesToString(roles []string) string {
 	// use this to serialize slice string to string
 	return strings.Join(roles, ", ")
 }

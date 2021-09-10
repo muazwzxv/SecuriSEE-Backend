@@ -10,34 +10,36 @@ import (
 )
 
 type GormInstance struct {
-	orm *gorm.DB
+	Orm *gorm.DB
 }
 
-var (
-	GORM = &GormInstance{}
-)
+var GORM GormInstance
 
-func ConnectDatabase() (*GormInstance, error) {
-	config := config.CFG.FetchDatabaseConfig()
-	dsn := fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
-		config.User,
-		config.Password,
-		config.Host,
-		config.Port,
-		config.DatabaseName,
-	)
-
-	if db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{}); err != nil {
-		return nil, err
-	} else {
-		// Migrate all tables
-		db.Debug().AutoMigrate(
-			&model.User{},
+func ConnectDatabase() GormInstance {
+	if GORM.Orm == nil {
+		config := config.CFG.FetchDatabaseConfig()
+		dsn := fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
+			config.User,
+			config.Password,
+			config.Host,
+			config.Port,
+			config.DatabaseName,
 		)
-		GORM = &GormInstance{
-			orm: db,
-		}
 
-		return GORM, nil
+		if db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{}); err != nil {
+			panic(fmt.Sprintf("Failed to connect to database: \n %v", err))
+		} else {
+			// Migrate all tables
+			db.Debug().AutoMigrate(
+				&model.User{},
+			)
+			GORM = GormInstance{
+				Orm: db,
+			}
+
+			return GORM
+		}
 	}
+
+	return GORM
 }
