@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	jwtware "github.com/gofiber/jwt/v3"
 	"gorm.io/gorm"
@@ -15,6 +16,7 @@ import (
 
 func main() {
 	fmt.Println("Application boot up")
+	app := fiber.New()
 
 	// load configuration file
 	config.New()
@@ -22,20 +24,25 @@ func main() {
 	// Connect to database
 	gorm := service.ConnectDatabase()
 
-	// Load all app configs
-	app := setup(gorm.Orm)
+	// Setup middleware
+	setupMiddleware(app)
 
-	// Recover after program panic
-	app.Use(recover.New())
+	// Load Routers
+	setupRouter(gorm.Orm, app)
 
 	app.Listen(":8080")
 }
 
-func setup(gorm *gorm.DB) *fiber.App {
-	app := fiber.New()
+func setupMiddleware(app *fiber.App) {
+	// Recover after program panic
+	app.Use(recover.New())
+	// Logger
+	app.Use(logger.New())
+}
+
+func setupRouter(gorm *gorm.DB, app *fiber.App) {
 	v1 := app.Group("/api")
 
-	// Unauthenticated routes go here
 	userRepository := controller.NewUserController(gorm)
 	v1.Post("/user", userRepository.CreateUser)
 	v1.Get("/", func(ctx *fiber.Ctx) error {
@@ -45,9 +52,9 @@ func setup(gorm *gorm.DB) *fiber.App {
 		})
 	})
 
-	// Authenticated routes go here
-
-	return app
+	v1.Get("/panic", func(ctx *fiber.Ctx) error {
+		panic("Panic testing")
+	})
 }
 
 func JwtMiddleware() fiber.Handler {
