@@ -5,22 +5,16 @@ import (
 	"Oracle-Hackathon-BE/controller"
 	"Oracle-Hackathon-BE/service"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/recover"
+	jwtware "github.com/gofiber/jwt/v3"
 	"gorm.io/gorm"
 )
 
 func main() {
 	fmt.Println("Application boot up")
-
-	defer func() {
-		if r := recover(); r != nil {
-			log.Println("Recovering")
-			log.Printf("\n Error was %v", r)
-		}
-	}()
 
 	// load configuration file
 	config.New()
@@ -31,9 +25,10 @@ func main() {
 	// Load all app configs
 	app := setup(gorm.Orm)
 
-	app.Listen(":8080")
+	// Recover after program panic
+	app.Use(recover.New())
 
-	fmt.Println("Hello what the fuck")
+	app.Listen(":8080")
 }
 
 func setup(gorm *gorm.DB) *fiber.App {
@@ -42,8 +37,7 @@ func setup(gorm *gorm.DB) *fiber.App {
 
 	// Unauthenticated routes go here
 	userRepository := controller.NewUserController(gorm)
-	v1.Post("/user", userRepository.CreateUser)
-
+	v1.Post("/user", JwtMiddleware(), userRepository.CreateUser)
 	v1.Get("/", func(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusAccepted).JSON(fiber.Map{
 			"Success": true,
@@ -51,11 +45,29 @@ func setup(gorm *gorm.DB) *fiber.App {
 		})
 	})
 
-	// app.Use(jwtware.New(jwtware.Config{
-	// 	SigningKey: []byte(config.CFG.GetJWTSecret()),
-	// }))
+	v1.Use(jwtware.New(jwtware.Config{
+		ErrorHandler: func(c *fiber.Ctx, e error) error {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"Message": "Unauthorized",
+				"Error":   e,
+			})
+		},
+		SigningKey: []byte(config.CFG.GetJWTSecret()),
+	}))
 
 	// Authenticated routes go here
 
 	return app
+}
+
+func JwtMiddleware() fiber.Handler {
+	return jwtware.New(jwtware.Config{
+		ErrorHandler: func(c *fiber.Ctx, e error) error {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"Message": "Unauthorized",
+				"Error":   e,
+			})
+		},
+		SigningKey: []byte(config.CFG.GetJWTSecret()),
+	})
 }

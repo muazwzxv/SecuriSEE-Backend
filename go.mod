@@ -7,7 +7,6 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gofiber/fiber/v2 v2.18.0
 	github.com/gofiber/jwt/v3 v3.0.2
-	github.com/google/uuid v1.3.0
 	github.com/klauspost/compress v1.13.5 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/viper v1.8.1
