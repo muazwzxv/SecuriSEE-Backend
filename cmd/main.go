@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
-	jwtware "github.com/gofiber/jwt/v3"
 	"gorm.io/gorm"
 )
 
@@ -52,9 +51,9 @@ func setup(gorm *gorm.DB) *fiber.App {
 		})
 	})
 
-	app.Use(jwtware.New(jwtware.Config{
-		SigningKey: []byte(config.CFG.GetJWTSecret()),
-	}))
+	// app.Use(jwtware.New(jwtware.Config{
+	// 	SigningKey: []byte(config.CFG.GetJWTSecret()),
+	// }))
 
 	// Authenticated routes go here
 

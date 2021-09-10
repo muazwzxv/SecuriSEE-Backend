@@ -41,13 +41,13 @@ func (c *Config) readEnv(key string) string {
 
 func (c *Config) FetchDatabaseConfig() *DatabaseConfig {
 
-	port := CFG.reader.GetInt("Database.Port")
+	port := CFG.reader.GetInt("Development.Database.Port")
 
 	return &DatabaseConfig{
-		User:         CFG.readEnv("Database.User"),
-		Password:     CFG.readEnv("Database.Password"),
-		Host:         CFG.readEnv("Database.Host"),
-		DatabaseName: CFG.readEnv("Database.Name"),
+		User:         CFG.readEnv("Development.Database.User"),
+		Password:     CFG.readEnv("Development.Database.Password"),
+		Host:         CFG.readEnv("Development.Database.Host"),
+		DatabaseName: CFG.readEnv("Development.Database.Name"),
 		Port:         port,
 	}
 

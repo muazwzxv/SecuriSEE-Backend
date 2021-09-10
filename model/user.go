@@ -4,14 +4,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
+	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type User struct {
-	ID       uuid.UUID `gorm:"type:uuid:default:uuid_generate_v4()"`
-	Ic       string    `gorm:"index"`
+	//ID       uuid.UUID `gorm:"type:uuid:default:uuid_generate_v4()"`
+	ID       uuid.UUID `gorm:"type:char(36);primary_key"`
+	Ic       string    `gorm:"not null"`
 	Name     string    `gorm:"not null"`
 	Phone    string    `gorm:"not null"`
 	Email    string
@@ -22,9 +23,20 @@ type User struct {
 	DeletedAt gorm.DeletedAt
 }
 
+func (u *User) BeforeCreate(scope *gorm.DB) {
+	scope.Statement.SetColumn("ID", uuid.NewV4())
+}
+
 // sql wrapper
 
 func (u *User) Create(gorm *gorm.DB) error {
+	if err := gorm.Debug().Create(u).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *User) Get(gorm *gorm.DB) error {
 	if err := gorm.Debug().Create(u).Error; err != nil {
 		return err
 	}
