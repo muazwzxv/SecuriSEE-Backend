@@ -16,6 +16,31 @@ func NewUserController(db *gorm.DB) *UserRepository {
 	return &UserRepository{gorm: db}
 }
 
+func (userRepository *UserRepository) Login(ctx *fiber.Ctx) error {
+
+	var login model.Login
+	if err := ctx.BodyParser(&login); err != nil {
+		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"Success": false,
+			"Message": "Cannot parse JSON",
+			"Error":   err,
+		})
+	}
+
+	var user model.User
+
+	// Get User by IC
+	err := user.GetUserByIc(userRepository.gorm, login.IC)
+	if err != nil {
+		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"Success": false,
+			"Message": "IC not found",
+			"Error":   err,
+		})
+	}
+
+}
+
 func (userRepository *UserRepository) CreateUser(ctx *fiber.Ctx) error {
 	var user model.User
 

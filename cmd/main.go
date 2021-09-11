@@ -45,6 +45,7 @@ func setupRouter(gorm *gorm.DB, app *fiber.App) {
 
 	userRepository := controller.NewUserController(gorm)
 	v1.Post("/user", userRepository.CreateUser)
+	v1.Post("/login", userRepository.Login)
 
 	v1.Get("/", testEndpoint)
 	v1.Get("/guarded", JwtMiddleware(), guaredEndpoint)

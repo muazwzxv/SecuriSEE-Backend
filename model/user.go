@@ -23,6 +23,12 @@ type User struct {
 	DeletedAt gorm.DeletedAt
 }
 
+// Struct to Login
+type Login struct {
+	IC       string `json:"ic"`
+	Password string `json:"password"`
+}
+
 // Gorm hooks
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	uuid := uuid.NewV4()
@@ -35,6 +41,13 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 func (u *User) Create(gorm *gorm.DB) error {
 	if err := gorm.Debug().Create(u).Error; err != nil {
 		return err
+	}
+	return nil
+}
+
+func (u *User) GetUserByIc(gorm *gorm.DB, ic string) error {
+	if res := gorm.Debug().Where("ic = ?", ic).First(u); res.Error != nil {
+		return res.Error
 	}
 	return nil
 }
