@@ -49,7 +49,7 @@ func (u *User) Get(gorm *gorm.DB) error {
 // Helpers
 
 func (u *User) IsEmailExist(gorm *gorm.DB) bool {
-	if res := gorm.Debug().Where("email = ?", u.Email).First(u); res != nil && res.RowsAffected == 0 {
+	if res := gorm.Debug().Select("email").Where("email = ?", u.Email).First(u); res != nil && res.RowsAffected == 0 {
 		return false
 	} else {
 		return true
@@ -57,7 +57,7 @@ func (u *User) IsEmailExist(gorm *gorm.DB) bool {
 }
 
 func (u *User) IsICExist(gorm *gorm.DB) bool {
-	if res := gorm.Debug().Where("ic = ?", u.Ic).First(u); res != nil && res.RowsAffected == 0 {
+	if res := gorm.Debug().Select("ic").Where("ic = ?", u.Ic).First(u); res != nil && res.RowsAffected == 0 {
 		return false
 	} else {
 		return true

@@ -23,7 +23,12 @@ func ConnectDatabase() *GormInstance {
 		config.DatabaseName,
 	)
 
-	if db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{}); err != nil {
+	if db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		// Skip default transaction to improve speed
+		SkipDefaultTransaction: true,
+		// Cache statements
+		PrepareStmt: true,
+	}); err != nil {
 		panic(fmt.Sprintf("Failed to connect to database: \n %v", err))
 	} else {
 		// Migrate all tables
