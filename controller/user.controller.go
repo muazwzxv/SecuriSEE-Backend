@@ -18,6 +18,14 @@ func NewUserController(db *gorm.DB) *UserRepository {
 	return &UserRepository{gorm: db}
 }
 
+// User Login
+// @Summary generate jwt for login.
+// @Description .
+// @Tags User
+// @Accept */*
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router / [Post]
 func (userRepository *UserRepository) Login(ctx *fiber.Ctx) error {
 
 	var login model.Login

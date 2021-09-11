@@ -3,10 +3,12 @@ package main
 import (
 	"Oracle-Hackathon-BE/config"
 	"Oracle-Hackathon-BE/controller"
+	_ "Oracle-Hackathon-BE/docs/swagger"
 	"Oracle-Hackathon-BE/service"
 	"fmt"
 	"net/http"
 
+	swagger "github.com/arsmn/fiber-swagger/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -14,6 +16,20 @@ import (
 	"gorm.io/gorm"
 )
 
+// @title CrimeNow Backend APi
+// @version 1.0
+// @description This is the first version of this API service.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name Muaz terkacak
+// @contact.email muazwazir@gmail.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /
+// @schemes http
 func main() {
 	fmt.Println("Application boot up")
 	app := fiber.New()
@@ -38,6 +54,9 @@ func setupMiddleware(app *fiber.App) {
 	app.Use(recover.New())
 	// Logger
 	app.Use(logger.New())
+	// Setup swagger
+	app.Get("/swagger/*", swagger.Handler)
+
 }
 
 func setupRouter(gorm *gorm.DB, app *fiber.App) {

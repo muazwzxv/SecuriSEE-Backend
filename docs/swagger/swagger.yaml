@@ -1,0 +1,17 @@
+basePath: /
+host: localhost:8080
+info:
+  contact:
+    email: muazwazir@gmail.com
+    name: Muaz terkacak
+  description: This is the first version of this API service.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: CrimeNow Backend APi
+  version: "1.0"
+paths: {}
+schemes:
+- http
+swagger: "2.0"
