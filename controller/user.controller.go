@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"Oracle-Hackathon-BE/config"
 	"Oracle-Hackathon-BE/model"
+	"Oracle-Hackathon-BE/service"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -27,11 +29,9 @@ func (userRepository *UserRepository) Login(ctx *fiber.Ctx) error {
 		})
 	}
 
-	var user model.User
-
 	// Get User by IC
-	err := user.GetUserByIc(userRepository.gorm, login.IC)
-	if err != nil {
+	var user model.User
+	if err := user.GetUserByIc(userRepository.gorm, login.IC); err != nil {
 		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"Success": false,
 			"Message": "IC not found",
@@ -39,6 +39,39 @@ func (userRepository *UserRepository) Login(ctx *fiber.Ctx) error {
 		})
 	}
 
+	// Check password
+	isMatch := user.CheckHash(login.Password)
+	if !isMatch {
+		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"Success": false,
+			"Message": "Password does not match",
+		})
+	}
+
+	// Generate jwt token
+	jwt := service.JwtWrapper{
+		SecretKey:    config.CFG.GetJWTSecret(),
+		Issuer:       "CrimeNow Backend",
+		ExpiredHours: 24,
+	}
+
+	payload := &config.UserJwt{
+		ID:   user.ID.String(),
+		IC:   user.Ic,
+		Role: user.RolesToArray(),
+	}
+
+	if token, err := jwt.GenerateToken(payload); err != nil {
+		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"Success": false,
+			"Message": "Failed to generate token",
+		})
+	} else {
+		return ctx.Status(http.StatusOK).JSON(fiber.Map{
+			"Success": true,
+			"Token":   token,
+		})
+	}
 }
 
 func (userRepository *UserRepository) CreateUser(ctx *fiber.Ctx) error {

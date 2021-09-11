@@ -101,6 +101,10 @@ func (u *User) IsRoleExist(role string) bool {
 	return false
 }
 
+func (u *User) RolesToArray() []string {
+	return strings.Split(u.Role, ",")
+}
+
 func (u *User) RolesToString(roles []string) {
 	// use this to serialize slice string to string
 	u.Role = strings.Join(roles, ", ")

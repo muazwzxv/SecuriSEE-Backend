@@ -52,3 +52,7 @@ func (c *Config) FetchDatabaseConfig() *DatabaseConfig {
 	}
 
 }
+
+func (c *Config) GetJWTSecret() string {
+	return CFG.reader.GetString("JWT.Secret")
+}
