@@ -1,1 +1,11 @@
+
+# Pull latest version of application
+git pull origin master
+
+# Build application
 GOOS=linux GOARCH=amd64 go build
+
+# Move to /root/go
+mv Oracle-Hackathon-BE /root/go
+
+
