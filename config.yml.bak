@@ -1,18 +1,18 @@
 Production:
   Database:
-    Host: 127.0.0.1
-    Name: CrimeNow
-    Port: 3306
-    User: root
-    Password: muaz@mysql
+    Host: 
+    Name: 
+    Port: 
+    User: 
+    Password: 
 
 Development:
   Database:
-    Host: 127.0.0.1
-    Name: CrimeNow
-    Port: 3306
-    User: muaz
-    Password: muaz@mysql
+    Host: 
+    Name: 
+    Port: 
+    User: 
+    Password: 
 
 Oracle:
   IAM:
