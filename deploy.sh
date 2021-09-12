@@ -1,6 +1,7 @@
 
 # Move to /root/go
 mv Oracle-Hackathon-BE /root/go
+mv config.yml /root/go
 
 # Restart the application service
 systemctl restart Go-Backend.service
