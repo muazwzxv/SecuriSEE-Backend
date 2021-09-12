@@ -46,7 +46,7 @@ func main() {
 	// Load Routers
 	setupRouter(gorm.Orm, app)
 
-	app.Listen(":8080")
+	app.Listen(":3000")
 }
 
 func setupMiddleware(app *fiber.App) {
