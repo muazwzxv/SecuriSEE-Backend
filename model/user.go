@@ -11,16 +11,16 @@ import (
 
 type User struct {
 	//ID       uuid.UUID `gorm:"type:uuid:default:uuid_generate_v4()"`
-	ID       uuid.UUID `gorm:"type:char(36);primary_key"`
-	Ic       string    `gorm:"not null"`
-	Name     string    `gorm:"not null"`
-	Phone    string    `gorm:"not null"`
-	Email    string
-	Role     string `gorm:"not null"`
-	Password string `gorm:"not null"`
+	ID       uuid.UUID `gorm:"type:char(36);primary_key" json:"id"`
+	Ic       string    `gorm:"not null" json:"ic"`
+	Name     string    `gorm:"not null" json:"name"`
+	Phone    string    `gorm:"not null" json:"phone"`
+	Email    string    `json:"email"`
+	Role     string    `gorm:"not null" json:"role"`
+	Password string    `gorm:"not null" json:"password"`
 
-	CreatedAt time.Time `gorm:"autoUpdateTime"`
-	DeletedAt gorm.DeletedAt
+	CreatedAt time.Time      `gorm:"autoUpdateTime" json:"created_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 }
 
 // Struct to Login
