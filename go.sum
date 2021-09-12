@@ -116,6 +116,8 @@ github.com/gofiber/jwt/v3 v3.0.2/go.mod h1:kckQzqkbFdVY4utGduYl+gkDoawrMn26gdSi8
 github.com/gofiber/utils v0.0.10 h1:3Mr7X7JdCUo7CWf/i5sajSaDmArEDtti8bM1JUVso2U=
 github.com/gofiber/utils v0.0.10/go.mod h1:9J5aHFUIjq0XfknT4+hdSMG6/jzfaAgCu4HEbWDeBlo=
 github.com/gogo/protobuf v1.3.2/go.mod h1:P1XiOD3dCwIKUDQYPy72D8LYyHL2YPYrpS2s69NZV8Q=
+github.com/golang-jwt/jwt v3.2.2+incompatible h1:IfV12K8xAKAnZqdXVzCZ+TOjboZ2keLg81eXfW3O+oY=
+github.com/golang-jwt/jwt v3.2.2+incompatible/go.mod h1:8pz2t5EyA70fFQQSrl6XZXzqecmYZeUEB8OUGHkxJ+I=
 github.com/golang-jwt/jwt/v4 v4.0.0 h1:RAqyYixv1p7uEnocuy8P1nru5wprCh/MH2BIlW5z5/o=
 github.com/golang-jwt/jwt/v4 v4.0.0/go.mod h1:/xlHOz8bRuivTWchD4jCa+NbatV+wEUSzwAxVc6locg=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=

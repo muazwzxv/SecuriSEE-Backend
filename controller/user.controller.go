@@ -4,6 +4,7 @@ import (
 	"Oracle-Hackathon-BE/config"
 	"Oracle-Hackathon-BE/model"
 	"Oracle-Hackathon-BE/service"
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -25,6 +26,7 @@ func (userRepository *UserRepository) Me(ctx *fiber.Ctx) error {
 	token := ctx.Locals("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 
+	fmt.Println(claims)
 	err := user.GetUserById(userRepository.gorm, claims["ID"].(string))
 	if err != nil {
 		return ctx.Status(http.StatusNotFound).JSON(fiber.Map{
