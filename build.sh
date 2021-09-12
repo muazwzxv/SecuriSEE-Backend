@@ -1,7 +1,4 @@
 
-# Pull latest version of application
-git pull origin master
-
 # Build application
 GOOS=linux GOARCH=amd64 go build
 
