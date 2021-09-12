@@ -45,6 +45,13 @@ func (u *User) Create(gorm *gorm.DB) error {
 	return nil
 }
 
+func (u *User) GetUserById(gorm *gorm.DB, id string) error {
+	if res := gorm.Debug().Select("id", "ic", "name", "phone", "email", "role", "created_at", "deleted_at").Where("id = ?", id).First(u); res.Error != nil {
+		return res.Error
+	}
+	return nil
+}
+
 func (u *User) GetUserByIc(gorm *gorm.DB, ic string) error {
 	if res := gorm.Debug().Where("ic = ?", ic).First(u); res.Error != nil {
 		return res.Error

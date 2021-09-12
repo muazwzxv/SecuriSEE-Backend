@@ -10,6 +10,7 @@ import (
 
 	swagger "github.com/arsmn/fiber-swagger/v2"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	jwtware "github.com/gofiber/jwt/v3"
@@ -54,6 +55,9 @@ func setupMiddleware(app *fiber.App) {
 	app.Use(recover.New())
 	// Logger
 	app.Use(logger.New())
+
+	app.Use(cors.New())
+
 	// Setup swagger
 	app.Get("/swagger/*", swagger.Handler)
 
@@ -63,7 +67,11 @@ func setupRouter(gorm *gorm.DB, app *fiber.App) {
 	v1 := app.Group("/api")
 
 	userRepository := controller.NewUserController(gorm)
+	v1.Get("/me", JwtMiddleware(), userRepository.Me)
 	v1.Post("/user", userRepository.CreateUser)
+	//	v1.Get("/user/:id")
+	//v1.Get("/user")
+
 	v1.Post("/login", userRepository.Login)
 
 	v1.Get("/", testEndpoint)

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type JwtWrapper struct {
@@ -42,9 +42,9 @@ func (j *JwtWrapper) GenerateToken(user *config.UserJwt) (string, error) {
 	}
 }
 
-func (j *JwtWrapper) VerifyToken(token string) error {
+func (j *JwtWrapper) VerifyToken(token string) (jwt.MapClaims, error) {
 	if token != "" {
-		return errors.New("token is null")
+		return nil, errors.New("token is null")
 	}
 
 	validate, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
@@ -54,11 +54,12 @@ func (j *JwtWrapper) VerifyToken(token string) error {
 		return []byte(config.CFG.GetJWTSecret()), nil
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if _, ok := validate.Claims.(jwt.MapClaims); !ok && !validate.Valid {
-		return err
+	if claims, ok := validate.Claims.(jwt.MapClaims); !ok && !validate.Valid {
+		return nil, err
+	} else {
+		return claims, nil
 	}
-	return nil
 }

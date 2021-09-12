@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 	"gorm.io/gorm"
 )
 
@@ -18,14 +19,29 @@ func NewUserController(db *gorm.DB) *UserRepository {
 	return &UserRepository{gorm: db}
 }
 
-// User Login
-// @Summary generate jwt for login.
-// @Description .
-// @Tags User
-// @Accept */*
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router / [Post]
+func (userRepository *UserRepository) Me(ctx *fiber.Ctx) error {
+	var user model.User
+
+	token := ctx.Locals("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+
+	err := user.GetUserById(userRepository.gorm, claims["ID"].(string))
+	if err != nil {
+		return ctx.Status(http.StatusNotFound).JSON(fiber.Map{
+			"Success": false,
+			"Message": "User not found",
+			"Error":   err,
+		})
+	}
+
+	return ctx.Status(http.StatusFound).JSON(fiber.Map{
+		"Success": true,
+		"Message": "User found",
+		"User":    user,
+	})
+
+}
+
 func (userRepository *UserRepository) Login(ctx *fiber.Ctx) error {
 
 	var login model.Login
