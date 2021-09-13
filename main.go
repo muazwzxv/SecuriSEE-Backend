@@ -22,7 +22,7 @@ import (
 // @termsOfService http://swagger.io/terms/
 
 // @contact.name Muaz terkacak
-// @contact.email muazwazir@gmail.com
+// @contact.email
 
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
