@@ -1,9 +1,11 @@
 package model
 
 import (
+	"Oracle-Hackathon-BE/query"
 	"strings"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -36,8 +38,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	return
 }
 
-// sql wrapper
-
+// CRUD Queries
 func (u *User) Create(gorm *gorm.DB) error {
 	if err := gorm.Debug().Create(u).Error; err != nil {
 		return err
@@ -46,28 +47,33 @@ func (u *User) Create(gorm *gorm.DB) error {
 }
 
 func (u *User) GetUserById(gorm *gorm.DB, id string) error {
-	if res := gorm.Debug().Select("id", "ic", "name", "phone", "email", "role", "created_at", "deleted_at").Where("id = ?", id).First(u); res.Error != nil {
+	if res := gorm.Debug().Scopes(selectUser).Where("id = ?", id).First(u); res.Error != nil {
 		return res.Error
 	}
 	return nil
 }
 
 func (u *User) GetUserByIc(gorm *gorm.DB, ic string) error {
-	if res := gorm.Debug().Where("ic = ?", ic).First(u); res.Error != nil {
-		return res.Error
-	}
-	return nil
-}
-
-func (u *User) Get(gorm *gorm.DB) error {
-	if err := gorm.Debug().Create(u).Error; err != nil {
+	if err := gorm.Debug().Where("ic = ?", ic).First(u).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-// Helpers
+func (u *User) GetAll(gorm *gorm.DB, ctx *fiber.Ctx) ([]User, error) {
+	var user []User
+	if err := gorm.Debug().Scopes(query.Paginate(ctx), selectUser).Find(&user).Error; err != nil {
+		return nil, err
+	}
+	return user, nil
+}
 
+// Scope wrapper
+func selectUser(db *gorm.DB) *gorm.DB {
+	return db.Select("id", "ic", "name", "phone", "email", "role", "created_at", "deleted_at")
+}
+
+// Helpers
 func (u *User) IsEmailExist(gorm *gorm.DB) bool {
 	if res := gorm.Debug().Select("email").Where("email = ?", u.Email).First(u); res != nil && res.RowsAffected == 0 {
 		return false

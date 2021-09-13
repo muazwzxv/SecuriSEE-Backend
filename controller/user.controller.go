@@ -21,7 +21,20 @@ func NewUserController(db *gorm.DB) *UserRepository {
 }
 
 func (userRepository *UserRepository) GetAll(ctx *fiber.Ctx) error {
-	return nil
+	var user model.User
+
+	users, err := user.GetAll(userRepository.gorm, ctx)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(http.StatusOK).JSON(fiber.Map{
+		"Success": true,
+		"Message": "User found",
+		"User":    users,
+	})
+
+	// return nil
 }
 
 func (userRepository *UserRepository) GetByID(ctx *fiber.Ctx) error {
@@ -36,7 +49,7 @@ func (userRepository *UserRepository) GetByID(ctx *fiber.Ctx) error {
 		})
 	}
 
-	return ctx.Status(http.StatusFound).JSON(fiber.Map{
+	return ctx.Status(http.StatusOK).JSON(fiber.Map{
 		"Success": true,
 		"Message": "User found",
 		"User":    user,
@@ -59,7 +72,7 @@ func (userRepository *UserRepository) Me(ctx *fiber.Ctx) error {
 		})
 	}
 
-	return ctx.Status(http.StatusFound).JSON(fiber.Map{
+	return ctx.Status(http.StatusOK).JSON(fiber.Map{
 		"Success": true,
 		"Message": "User found",
 		"User":    user,
