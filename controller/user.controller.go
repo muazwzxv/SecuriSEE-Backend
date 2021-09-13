@@ -147,6 +147,14 @@ func (userRepository *UserRepository) CreateUser(ctx *fiber.Ctx) error {
 		})
 	}
 
+	// validate payload
+	if err := user.Validate(); err != nil {
+		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"Success": false,
+			"Message": err.Error(),
+		})
+	}
+
 	// Check ic exist
 	if cond := user.IsICExist(userRepository.gorm); cond == true {
 		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{

@@ -36,6 +36,7 @@ func ConnectDatabase() *GormInstance {
 			&model.User{},
 			&model.Report{},
 			&model.News{},
+			&model.CarDetect{},
 		)
 
 		return &GormInstance{Orm: db}

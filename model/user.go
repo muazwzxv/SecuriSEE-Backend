@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/gofiber/fiber/v2"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -31,6 +33,16 @@ type User struct {
 type Login struct {
 	IC       string `json:"ic"`
 	Password string `json:"password"`
+}
+
+// Validator
+func (u User) Validate() error {
+	return validation.ValidateStruct(&u,
+		validation.Field(&u.Ic, validation.Required),
+		validation.Field(&u.Name, validation.Required),
+		validation.Field(&u.Password, validation.Required),
+		validation.Field(&u.Email, validation.Required, is.Email),
+	)
 }
 
 // Gorm hooks

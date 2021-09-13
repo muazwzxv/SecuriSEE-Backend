@@ -5,10 +5,12 @@ go 1.16
 require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/arsmn/fiber-swagger/v2 v2.17.0
+	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-openapi/jsonreference v0.19.6 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
+	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible // indirect
 	github.com/gofiber/fiber v1.14.6 // indirect
 	github.com/gofiber/fiber/v2 v2.18.0
 	github.com/gofiber/jwt/v3 v3.0.2

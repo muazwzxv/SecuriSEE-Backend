@@ -3,6 +3,7 @@ package model
 import (
 	"time"
 
+	validation "github.com/go-ozzo/ozzo-validation"
 	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
 )
@@ -21,4 +22,13 @@ type Report struct {
 
 	// relationship
 	User User
+}
+
+func (r Report) Validate() error {
+	return validation.ValidateStruct(&r,
+		validation.Field(&r.Description, validation.Required),
+		validation.Field(&r.UserID, validation.Required),
+		validation.Field(&r.Lat, validation.Required),
+		validation.Field(&r.Lng, validation.Required),
+	)
 }
