@@ -20,6 +20,29 @@ func NewUserController(db *gorm.DB) *UserRepository {
 	return &UserRepository{gorm: db}
 }
 
+func (userRepository *UserRepository) GetAll(ctx *fiber.Ctx) error {
+	return nil
+}
+
+func (userRepository *UserRepository) GetByID(ctx *fiber.Ctx) error {
+	var user model.User
+
+	err := user.GetUserById(userRepository.gorm, ctx.Params("id"))
+	if err != nil {
+		return ctx.Status(http.StatusNotFound).JSON(fiber.Map{
+			"Success": false,
+			"Message": "User not found",
+			"Error":   err,
+		})
+	}
+
+	return ctx.Status(http.StatusFound).JSON(fiber.Map{
+		"Success": true,
+		"Message": "User found",
+		"User":    user,
+	})
+}
+
 func (userRepository *UserRepository) Me(ctx *fiber.Ctx) error {
 	var user model.User
 

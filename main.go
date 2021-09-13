@@ -67,10 +67,10 @@ func setupRouter(gorm *gorm.DB, app *fiber.App) {
 	v1 := app.Group("/api")
 
 	userRepository := controller.NewUserController(gorm)
-	v1.Get("/me", JwtMiddleware(), userRepository.Me)
 	v1.Post("/user", userRepository.CreateUser)
-	//	v1.Get("/user/:id")
-	//v1.Get("/user")
+	v1.Get("/me", JwtMiddleware(), userRepository.Me)
+	v1.Get("/user/:id", JwtMiddleware(), userRepository.GetByID)
+	v1.Get("/user", JwtMiddleware(), userRepository.GetAll)
 
 	v1.Post("/login", userRepository.Login)
 
