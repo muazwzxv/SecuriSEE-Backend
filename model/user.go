@@ -23,6 +23,8 @@ type User struct {
 
 	CreatedAt time.Time      `gorm:"autoUpdateTime" json:"created_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`
+
+	Report []Report `gorm:"ForeignKey:UserID"`
 }
 
 // Struct to Login

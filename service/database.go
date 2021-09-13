@@ -34,8 +34,11 @@ func ConnectDatabase() *GormInstance {
 		// Migrate all tables
 		db.Debug().AutoMigrate(
 			&model.User{},
+			&model.Report{},
+			&model.News{},
 		)
 
 		return &GormInstance{Orm: db}
 	}
+
 }

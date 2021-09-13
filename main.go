@@ -6,7 +6,6 @@ import (
 	_ "Oracle-Hackathon-BE/docs/swagger"
 	"Oracle-Hackathon-BE/service"
 	"fmt"
-	"net/http"
 
 	swagger "github.com/arsmn/fiber-swagger/v2"
 	"github.com/gofiber/fiber/v2"
@@ -47,7 +46,7 @@ func main() {
 	// Load Routers
 	setupRouter(gorm.Orm, app)
 
-	app.Listen(":3000")
+	defer app.Listen(":3000")
 }
 
 func setupMiddleware(app *fiber.App) {
@@ -70,18 +69,16 @@ func setupRouter(gorm *gorm.DB, app *fiber.App) {
 	v1.Post("/user", userRepository.CreateUser)
 	v1.Get("/me", JwtMiddleware(), userRepository.Me)
 	v1.Get("/user/:id", JwtMiddleware(), userRepository.GetByID)
-	v1.Get("/user", userRepository.GetAll)
+	v1.Get("/user", JwtMiddleware(), userRepository.GetAll)
 
 	v1.Post("/login", userRepository.Login)
-
-	v1.Get("/", testEndpoint)
-	v1.Get("/guarded", JwtMiddleware(), guaredEndpoint)
-
-	v1.Get("/panic", func(ctx *fiber.Ctx) error {
-		panic("Panic testing")
+	v1.Get("panic", func(c *fiber.Ctx) error {
+		panic("ffs")
 	})
+
 }
 
+// Jwt middleware
 func JwtMiddleware() fiber.Handler {
 	return jwtware.New(jwtware.Config{
 		ErrorHandler: func(c *fiber.Ctx, e error) error {
@@ -91,19 +88,5 @@ func JwtMiddleware() fiber.Handler {
 			})
 		},
 		SigningKey: []byte(config.CFG.GetJWTSecret()),
-	})
-}
-
-func testEndpoint(ctx *fiber.Ctx) error {
-	return ctx.Status(http.StatusAccepted).JSON(fiber.Map{
-		"Success": true,
-		"Message": "Welcome to Not guarded endpoint",
-	})
-}
-
-func guaredEndpoint(ctx *fiber.Ctx) error {
-	return ctx.Status(http.StatusAccepted).JSON(fiber.Map{
-		"Success": true,
-		"Message": "Welcome to Guarded guarded endpoint",
 	})
 }
