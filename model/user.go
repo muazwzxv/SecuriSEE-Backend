@@ -1,7 +1,7 @@
 package model
 
 import (
-	"Oracle-Hackathon-BE/query"
+	"Oracle-Hackathon-BE/util"
 	"strings"
 	"time"
 
@@ -29,6 +29,12 @@ type User struct {
 	Report []Report `gorm:"ForeignKey:UserID"`
 }
 
+const (
+	ADMIN  = "admin"
+	USER   = "user"
+	CAMERA = "camera"
+)
+
 // Struct to Login
 type Login struct {
 	IC       string `json:"ic"`
@@ -41,6 +47,7 @@ func (u User) Validate() error {
 		validation.Field(&u.Ic, validation.Required),
 		validation.Field(&u.Name, validation.Required),
 		validation.Field(&u.Password, validation.Required),
+		validation.Field(&u.Role, validation.Required),
 		validation.Field(&u.Email, validation.Required, is.Email),
 	)
 }
@@ -76,7 +83,7 @@ func (u *User) GetUserByIc(gorm *gorm.DB, ic string) error {
 
 func (u *User) GetAll(gorm *gorm.DB, ctx *fiber.Ctx) ([]User, error) {
 	var user []User
-	if err := gorm.Debug().Scopes(query.Paginate(ctx), selectUser).Find(&user).Error; err != nil {
+	if err := gorm.Debug().Scopes(util.Paginate(ctx), selectUser).Find(&user).Error; err != nil {
 		return nil, err
 	}
 	return user, nil

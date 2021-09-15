@@ -4,7 +4,7 @@ import (
 	"Oracle-Hackathon-BE/config"
 	"Oracle-Hackathon-BE/model"
 	"Oracle-Hackathon-BE/service"
-	"fmt"
+	"Oracle-Hackathon-BE/util"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -21,7 +21,19 @@ func NewUserController(db *gorm.DB) *UserRepository {
 }
 
 func (userRepository *UserRepository) GetAll(ctx *fiber.Ctx) error {
+	claim := util.GetClaims(ctx)
+
 	var user model.User
+	user.GetUserById(userRepository.gorm, claim["ID"].(string))
+
+	// Check permissions
+	isAdmin := user.IsRoleExist("admin")
+	if !isAdmin {
+		return ctx.Status(http.StatusForbidden).JSON(fiber.Map{
+			"Success": false,
+			"Message": "Not Allowed",
+		})
+	}
 
 	users, err := user.GetAll(userRepository.gorm, ctx)
 	if err != nil {
@@ -33,8 +45,6 @@ func (userRepository *UserRepository) GetAll(ctx *fiber.Ctx) error {
 		"Message": "User found",
 		"User":    users,
 	})
-
-	// return nil
 }
 
 func (userRepository *UserRepository) GetByID(ctx *fiber.Ctx) error {
@@ -62,7 +72,6 @@ func (userRepository *UserRepository) Me(ctx *fiber.Ctx) error {
 	token := ctx.Locals("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 
-	fmt.Println(claims)
 	err := user.GetUserById(userRepository.gorm, claims["ID"].(string))
 	if err != nil {
 		return ctx.Status(http.StatusNotFound).JSON(fiber.Map{
@@ -147,6 +156,12 @@ func (userRepository *UserRepository) CreateUser(ctx *fiber.Ctx) error {
 		})
 	}
 
+	// Set Role
+	if user.Role == "" {
+		// If role not provided, default to user
+		user.RolesToString([]string{"user"})
+	}
+
 	// validate payload
 	if err := user.Validate(); err != nil {
 		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
@@ -174,16 +189,12 @@ func (userRepository *UserRepository) CreateUser(ctx *fiber.Ctx) error {
 	// Hash password
 	user.HashPassword(user.Password)
 
-	// Set Role
-	user.RolesToString([]string{"user"})
-
 	// Create user
 	err := user.Create(userRepository.gorm)
 	if err != nil {
 		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
 			"Success": false,
-			"Message": "Something wrong happened",
-			"Error":   err.Error(),
+			"Message": err.Error(),
 		})
 	}
 

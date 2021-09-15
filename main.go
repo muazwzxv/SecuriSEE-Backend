@@ -67,15 +67,15 @@ func setupRouter(gorm *gorm.DB, app *fiber.App) {
 
 	userRepository := controller.NewUserController(gorm)
 	v1.Post("/user", userRepository.CreateUser)
-	v1.Get("/me", JwtMiddleware(), userRepository.Me)
 	v1.Get("/user/:id", JwtMiddleware(), userRepository.GetByID)
 	v1.Get("/user", JwtMiddleware(), userRepository.GetAll)
 
+	// Auth
 	v1.Post("/login", userRepository.Login)
-	v1.Get("panic", func(c *fiber.Ctx) error {
-		panic("ffs")
-	})
+	v1.Get("/me", JwtMiddleware(), userRepository.Me)
 
+	carEntryrepository := controller.NewCarEntryController(gorm)
+	v1.Post("/car", carEntryrepository.CreateEntry)
 }
 
 // Jwt middleware

@@ -1,9 +1,10 @@
-package query
+package util
 
 import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 	"gorm.io/gorm"
 )
 
@@ -25,6 +26,12 @@ func Paginate(ctx *fiber.Ctx) func(db *gorm.DB) *gorm.DB {
 		offset := (page - 1) * pageSize
 		return db.Offset(offset).Limit(pageSize)
 	}
+}
+
+// Helper
+func GetClaims(ctx *fiber.Ctx) jwt.MapClaims {
+	token := ctx.Locals("user").(*jwt.Token)
+	return token.Claims.(jwt.MapClaims)
 }
 
 // db.Scopes(Paginate(r)).Find(&users)
