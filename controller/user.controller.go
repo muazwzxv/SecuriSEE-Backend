@@ -25,35 +25,32 @@ func (userRepository *UserRepository) GetAll(ctx *fiber.Ctx) error {
 	user.GetUserById(userRepository.gorm, claim["ID"].(string))
 
 	// Check permissions
-	isAdmin := user.IsRoleExist("admin")
-	if !isAdmin {
+	if isAdmin := user.IsRoleExist("admin"); !isAdmin {
 		return ctx.Status(http.StatusForbidden).JSON(fiber.Map{
 			"Success": false,
 			"Message": "Not Allowed",
 		})
 	}
 
-	users, err := user.GetAll(userRepository.gorm, ctx)
-	if err != nil {
-		return err
+	if users, err := user.GetAll(userRepository.gorm, ctx); err != nil {
+		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
+			"Success": true,
+			"Message": err.Error(),
+		})
+	} else {
+		return ctx.Status(http.StatusOK).JSON(fiber.Map{
+			"Success": true,
+			"User":    users,
+		})
 	}
-
-	return ctx.Status(http.StatusOK).JSON(fiber.Map{
-		"Success": true,
-		"Message": "User found",
-		"User":    users,
-	})
 }
 
 func (userRepository *UserRepository) GetByID(ctx *fiber.Ctx) error {
 	var user model.User
-
-	err := user.GetUserById(userRepository.gorm, ctx.Params("id"))
-	if err != nil {
+	if err := user.GetUserById(userRepository.gorm, ctx.Params("id")); err != nil {
 		return ctx.Status(http.StatusNotFound).JSON(fiber.Map{
 			"Success": false,
-			"Message": "User not found",
-			"Error":   err,
+			"Error":   err.Error(),
 		})
 	}
 

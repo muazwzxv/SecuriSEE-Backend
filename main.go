@@ -79,6 +79,11 @@ func setupRouter(gorm *gorm.DB, app *fiber.App) {
 
 	carEntryrepository := controller.NewCarEntryController(gorm)
 	v1.Post("/car", carEntryrepository.CreateEntry)
+
+	newsRepository := controller.NewNewsRepository(gorm)
+	v1.Post("/news", JwtMiddleware(), newsRepository.Create)
+	v1.Get("/news/:id", JwtMiddleware(), newsRepository.GetById)
+	v1.Get("/news", JwtMiddleware(), newsRepository.GetAll)
 }
 
 // Jwt middleware

@@ -25,7 +25,7 @@ func (n News) Validate() error {
 	return validation.ValidateStruct(&n,
 		validation.Field(&n.Headline, validation.Required),
 		validation.Field(&n.Description, validation.Required),
-		validation.Field(&n.Image, validation.Required),
+		//validation.Field(&n.Image, validation.Required),
 	)
 }
 

@@ -24,8 +24,7 @@ func (carEntryRepository *CarEntryRepository) CreateEntry(ctx *fiber.Ctx) error 
 	user.GetUserById(carEntryRepository.gorm, claim["ID"].(string))
 
 	// Check permissions
-	isCamera := user.IsRoleExist("camera")
-	if !isCamera {
+	if isCamera := user.IsRoleExist("camera"); !isCamera {
 		return ctx.Status(http.StatusForbidden).JSON(fiber.Map{
 			"Success": false,
 			"Message": "Not Allowed",
@@ -70,6 +69,6 @@ func (carEntryRepository *CarEntryRepository) CreateEntry(ctx *fiber.Ctx) error 
 	return ctx.Status(http.StatusCreated).JSON(fiber.Map{
 		"Success": true,
 		"Message": "Entry created",
-		"User":    entry,
+		"entry":   entry,
 	})
 }

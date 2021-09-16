@@ -48,7 +48,7 @@ func (authRepository *AuthRepository) LoginAdminAndCamera(ctx *fiber.Ctx) error 
 	}
 
 	// Check password
-	if isMatch := user.CheckHash(login.Password); isMatch {
+	if isMatch := user.CheckHash(login.Password); !isMatch {
 		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"Success": false,
 			"Message": "Password does not match",
@@ -101,7 +101,7 @@ func (authRepository *AuthRepository) LoginUser(ctx *fiber.Ctx) error {
 	}
 
 	// Check password
-	if isMatch := user.CheckHash(login.Password); isMatch {
+	if isMatch := user.CheckHash(login.Password); !isMatch {
 		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"Success": false,
 			"Message": "Password does not match",
