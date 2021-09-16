@@ -26,3 +26,10 @@ func (n News) Validate() error {
 		validation.Field(&n.Image, validation.Required),
 	)
 }
+
+// Gorm hooks
+func (n *News) BeforeCreate(tx *gorm.DB) (err error) {
+	uuid := uuid.NewV4()
+	n.ID = uuid
+	return
+}
