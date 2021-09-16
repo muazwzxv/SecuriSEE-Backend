@@ -1,9 +1,7 @@
 package controller
 
 import (
-	"Oracle-Hackathon-BE/config"
 	"Oracle-Hackathon-BE/model"
-	"Oracle-Hackathon-BE/service"
 	"Oracle-Hackathon-BE/util"
 	"net/http"
 
@@ -89,60 +87,54 @@ func (userRepository *UserRepository) Me(ctx *fiber.Ctx) error {
 
 }
 
-func (userRepository *UserRepository) Login(ctx *fiber.Ctx) error {
-
-	var login model.Login
-	if err := ctx.BodyParser(&login); err != nil {
+func (userRepository *UserRepository) CreateAdminOrCamera(ctx *fiber.Ctx) error {
+	var user model.User
+	// Parse json
+	if err := ctx.BodyParser(&user); err != nil {
 		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"Success": false,
 			"Message": "Cannot parse JSON",
-			"Error":   err,
 		})
 	}
 
-	// Get User by IC
-	var user model.User
-	if err := user.GetUserByIc(userRepository.gorm, login.IC); err != nil {
+	// Set Role
+	if user.Role == "" {
+		// If role not provided, default to user
+		user.RolesToString([]string{"camera"})
+	}
+
+	if err := ValidateAdminCamera(user); err != nil {
 		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"Success": false,
-			"Message": "IC not found",
-			"Error":   err,
+			"Message": err.Error(),
 		})
 	}
 
-	// Check password
-	isMatch := user.CheckHash(login.Password)
-	if !isMatch {
+	// check email exists
+	if cond := user.IsEmailExist(userRepository.gorm); cond == true {
 		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"Success": false,
-			"Message": "Password does not match",
+			"Message": "Email already exists",
 		})
 	}
 
-	// Generate jwt token
-	jwt := service.JwtWrapper{
-		SecretKey:    config.CFG.GetJWTSecret(),
-		Issuer:       "CrimeNow Backend",
-		ExpiredHours: 24,
-	}
+	// Hash password
+	user.HashPassword(user.Password)
 
-	payload := &config.UserJwt{
-		ID:   user.ID.String(),
-		IC:   user.Ic,
-		Role: user.RolesToArray(),
-	}
-
-	if token, err := jwt.GenerateToken(payload); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
+	// Create user
+	if err := user.Create(userRepository.gorm); err != nil {
+		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
 			"Success": false,
-			"Message": "Failed to generate token",
-		})
-	} else {
-		return ctx.Status(http.StatusOK).JSON(fiber.Map{
-			"Success": true,
-			"Token":   token,
+			"Message": err.Error(),
 		})
 	}
+
+	return ctx.Status(http.StatusCreated).JSON(fiber.Map{
+		"Success": true,
+		"Message": "User created",
+		"User":    user,
+	})
+
 }
 
 func (userRepository *UserRepository) CreateUser(ctx *fiber.Ctx) error {

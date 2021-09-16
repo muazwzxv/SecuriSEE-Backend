@@ -36,8 +36,13 @@ const (
 )
 
 // Struct to Login
-type Login struct {
+type LoginUser struct {
 	IC       string `json:"ic"`
+	Password string `json:"password"`
+}
+
+type LoginAdminAndCamera struct {
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
@@ -76,6 +81,13 @@ func (u *User) GetUserById(gorm *gorm.DB, id string) error {
 
 func (u *User) GetUserByIc(gorm *gorm.DB, ic string) error {
 	if err := gorm.Debug().Where("ic = ?", ic).First(u).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *User) GetUserByEmail(gorm *gorm.DB, email string) error {
+	if err := gorm.Debug().Where("email = ?", email).First(u).Error; err != nil {
 		return err
 	}
 	return nil

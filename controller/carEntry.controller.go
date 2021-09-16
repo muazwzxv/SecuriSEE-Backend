@@ -2,6 +2,7 @@ package controller
 
 import (
 	"Oracle-Hackathon-BE/model"
+	"Oracle-Hackathon-BE/util"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -18,6 +19,18 @@ func NewCarEntryController(db *gorm.DB) *CarEntryRepository {
 
 func (carEntryRepository *CarEntryRepository) CreateEntry(ctx *fiber.Ctx) error {
 	// validate role
+	claim := util.GetClaims(ctx)
+	var user model.User
+	user.GetUserById(carEntryRepository.gorm, claim["ID"].(string))
+
+	// Check permissions
+	isCamera := user.IsRoleExist("camera")
+	if !isCamera {
+		return ctx.Status(http.StatusForbidden).JSON(fiber.Map{
+			"Success": false,
+			"Message": "Not Allowed",
+		})
+	}
 
 	var entry model.CarEntry
 
