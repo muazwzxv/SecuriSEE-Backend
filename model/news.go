@@ -1,9 +1,11 @@
 package model
 
 import (
+	"Oracle-Hackathon-BE/util"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/gofiber/fiber/v2"
 	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
 )
@@ -32,4 +34,27 @@ func (n *News) BeforeCreate(tx *gorm.DB) (err error) {
 	uuid := uuid.NewV4()
 	n.ID = uuid
 	return
+}
+
+// CRUD Queries
+func (n *News) Create(gorm *gorm.DB) error {
+	if err := gorm.Debug().Create(n).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (n *News) GetById(gorm *gorm.DB, id string) error {
+	if err := gorm.Debug().Where("id = ?", id).First(n).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (n *News) GetAll(gorm *gorm.DB, ctx *fiber.Ctx) ([]News, error) {
+	var news []News
+	if err := gorm.Debug().Scopes(util.Paginate(ctx)).Find(&news).Error; err != nil {
+		return nil, err
+	}
+	return news, nil
 }
