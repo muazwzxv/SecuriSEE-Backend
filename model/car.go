@@ -32,6 +32,7 @@ func (c CarEntry) Validate() error {
 	return validation.ValidateStruct(&c,
 		validation.Field(&c.PlateNumber, validation.Required),
 		validation.Field(&c.City, validation.Required),
+		//validation.Field(&c.Status, validation.Required),
 	)
 }
 

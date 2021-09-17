@@ -17,6 +17,49 @@ func NewCarEntryController(db *gorm.DB) *CarEntryRepository {
 	return &CarEntryRepository{gorm: db}
 }
 
+func (carEntryRepository *CarEntryRepository) GetById(ctx *fiber.Ctx) error {
+	var c model.CarEntry
+	if err := c.GetEntryById(carEntryRepository.gorm, ctx.Params("id")); err != nil {
+		return ctx.Status(http.StatusNotFound).JSON(fiber.Map{
+			"Success": false,
+			"Error":   err.Error(),
+		})
+	}
+
+	return ctx.Status(http.StatusOK).JSON(fiber.Map{
+		"Success": true,
+		"Car":     c,
+	})
+}
+
+func (carEntryRepository *CarEntryRepository) GetAll(ctx *fiber.Ctx) error {
+	// validate role
+	claim := util.GetClaims(ctx)
+	var user model.User
+	user.GetUserById(carEntryRepository.gorm, claim["ID"].(string))
+
+	// Check permissions
+	if isAdmin := user.IsRoleExist("admin"); !isAdmin {
+		return ctx.Status(http.StatusForbidden).JSON(fiber.Map{
+			"Success": false,
+			"Message": "Not Allowed",
+		})
+	}
+
+	var car model.CarEntry
+	if cars, err := car.GetAll(carEntryRepository.gorm, ctx); err != nil {
+		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
+			"Success": true,
+			"Message": err.Error(),
+		})
+	} else {
+		return ctx.Status(http.StatusOK).JSON(fiber.Map{
+			"Success": true,
+			"Cars":    cars,
+		})
+	}
+}
+
 func (carEntryRepository *CarEntryRepository) CreateEntry(ctx *fiber.Ctx) error {
 	// validate role
 	claim := util.GetClaims(ctx)
