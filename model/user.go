@@ -26,7 +26,8 @@ type User struct {
 	CreatedAt time.Time      `gorm:"autoUpdateTime" json:"created_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 
-	Report []Report `gorm:"ForeignKey:UserID"`
+	Report []Report `gorm:"foreignKey:UserID"`
+	Image  []Image  `gorm:"foreignKey:UserID"`
 }
 
 const (

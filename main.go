@@ -57,6 +57,9 @@ func setupMiddleware(app *fiber.App) {
 
 	app.Use(cors.New())
 
+	app.Server().MaxConnsPerIP = 1
+	app.Static("/cdn/image/muazkacak", "./images")
+
 	// Setup swagger
 	app.Get("/swagger/*", swagger.Handler)
 
