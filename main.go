@@ -46,12 +46,13 @@ func main() {
 	// Load Routers
 	setupRouter(gorm.Orm, app)
 
-	defer app.Listen(":3000")
+	app.Listen(":3000")
 }
 
 func setupMiddleware(app *fiber.App) {
 	// Recover after program panic
 	app.Use(recover.New())
+
 	// Logger
 	app.Use(logger.New())
 
@@ -89,6 +90,10 @@ func setupRouter(gorm *gorm.DB, app *fiber.App) {
 	v1.Post("/news", JwtMiddleware(), newsRepository.Create)
 	v1.Get("/news/:id", JwtMiddleware(), newsRepository.GetById)
 	v1.Get("/news", JwtMiddleware(), newsRepository.GetAll)
+
+	imageRepository := controller.NewImageRepository()
+	v1.Post("/image/upload", imageRepository.Upload)
+	v1.Get("/image/download/:filename", imageRepository.Upload)
 }
 
 // Jwt middleware

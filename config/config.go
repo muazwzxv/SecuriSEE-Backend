@@ -56,3 +56,7 @@ func (c *Config) FetchDatabaseConfig() *DatabaseConfig {
 func (c *Config) GetJWTSecret() string {
 	return CFG.reader.GetString("JWT.Secret")
 }
+
+func (c *Config) GetBucketName() string {
+	return CFG.reader.GetString("Oracle.BucketName")
+}

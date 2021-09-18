@@ -14,6 +14,9 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/klauspost/compress v1.13.5 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/oracle/oci-go-sdk v24.3.0+incompatible // indirect
+	github.com/oracle/oci-go-sdk/v41 v41.2.0
+	github.com/oracle/oci-go-sdk/v47 v47.1.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/viper v1.8.1
 	github.com/swaggo/swag v1.7.1
