@@ -91,8 +91,8 @@ func setupRouter(gorm *gorm.DB, app *fiber.App) {
 	v1.Get("/news/:id", JwtMiddleware(), newsRepository.GetById)
 	v1.Get("/news", JwtMiddleware(), newsRepository.GetAll)
 
-	imageRepository := controller.NewImageRepository()
-	v1.Post("/image/upload", imageRepository.Upload)
+	imageRepository := controller.NewImageRepository(gorm)
+	v1.Post("/image/upload", JwtMiddleware(), imageRepository.Upload)
 	v1.Get("/image/download/:filename", imageRepository.Upload)
 }
 

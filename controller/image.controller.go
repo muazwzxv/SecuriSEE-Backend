@@ -4,6 +4,7 @@ import (
 	"Oracle-Hackathon-BE/model"
 	"Oracle-Hackathon-BE/service"
 	"Oracle-Hackathon-BE/util"
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,13 +12,16 @@ import (
 )
 
 type ImageRepository struct {
-	StorageClient service.ObjectStorageInstance
+	StorageClient *service.ObjectStorageInstance
 	gorm          *gorm.DB
 }
 
-func NewImageRepository() *ImageRepository {
+func NewImageRepository(db *gorm.DB) *ImageRepository {
 	objectStorage := service.ConnectToObjectStorage()
-	return &ImageRepository{StorageClient: *objectStorage}
+	return &ImageRepository{
+		StorageClient: objectStorage,
+		gorm:          db,
+	}
 }
 
 func (imageRepository *ImageRepository) Upload(ctx *fiber.Ctx) error {
@@ -31,7 +35,7 @@ func (imageRepository *ImageRepository) Upload(ctx *fiber.Ctx) error {
 	isUser := user.IsRoleExist("user")
 	isAdmin := user.IsRoleExist("admin")
 
-	if !isUser || !isAdmin {
+	if !isUser && !isAdmin {
 		return ctx.Status(http.StatusForbidden).JSON(fiber.Map{
 			"Success": false,
 			"Message": "Not Allowed",
@@ -62,6 +66,7 @@ func (imageRepository *ImageRepository) Upload(ctx *fiber.Ctx) error {
 		})
 	}
 
+	fmt.Println("reached here x1")
 	image := model.Image{
 		FileName: file.Filename,
 		UserID:   user.ID,
@@ -69,9 +74,10 @@ func (imageRepository *ImageRepository) Upload(ctx *fiber.Ctx) error {
 
 	_ = image.Create(imageRepository.gorm)
 
-	return ctx.Status(http.StatusConflict).JSON(fiber.Map{
+	fmt.Println("reached here x2")
+	return ctx.Status(http.StatusOK).JSON(fiber.Map{
 		"Success": false,
-		"Message": err.Error(),
+		"Message": "Uploaded",
 	})
 
 }
