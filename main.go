@@ -97,6 +97,9 @@ func setupRouter(gorm *gorm.DB, app *fiber.App) {
 
 	reportRepository := controller.NewReportRepository(gorm)
 	v1.Post("/report", JwtMiddleware(), reportRepository.Create)
+	v1.Get("/report", JwtMiddleware(), reportRepository.GetAll)
+	v1.Get("/report/:id", JwtMiddleware(), reportRepository.GetById)
+	v1.Get("/report/:id/image", JwtMiddleware(), reportRepository.GetImageFromReport)
 }
 
 // Jwt middleware
