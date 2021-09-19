@@ -4,7 +4,6 @@ import (
 	"Oracle-Hackathon-BE/model"
 	"Oracle-Hackathon-BE/service"
 	"Oracle-Hackathon-BE/util"
-	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -25,7 +24,6 @@ func NewImageRepository(db *gorm.DB) *ImageRepository {
 }
 
 func (imageRepository *ImageRepository) Upload(ctx *fiber.Ctx) error {
-
 	// validate role
 	claim := util.GetClaims(ctx)
 	var user model.User
@@ -42,15 +40,14 @@ func (imageRepository *ImageRepository) Upload(ctx *fiber.Ctx) error {
 		})
 	}
 
+	// Handle file
 	file, err := ctx.FormFile("image")
-
 	if err != nil {
 		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
 			"Success": false,
 			"Message": err.Error(),
 		})
 	}
-
 	getFile, err := file.Open()
 	if err != nil {
 		return ctx.Status(http.StatusForbidden).JSON(fiber.Map{
@@ -59,6 +56,16 @@ func (imageRepository *ImageRepository) Upload(ctx *fiber.Ctx) error {
 		})
 	}
 
+	// Validate report
+	var report model.Report
+	if err := report.GetById(imageRepository.gorm, ctx.Params("reportId")); err != nil {
+		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
+			"Success": false,
+			"Message": "Failed to fetch associate report",
+		})
+	}
+
+	// Upload to object storage
 	if err := imageRepository.StorageClient.UploadFile(file.Filename, file.Size, getFile, nil); err != nil {
 		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
 			"Success": false,
@@ -66,17 +73,20 @@ func (imageRepository *ImageRepository) Upload(ctx *fiber.Ctx) error {
 		})
 	}
 
-	fmt.Println("reached here x1")
 	image := model.Image{
 		FileName: file.Filename,
-		UserID:   user.ID,
+		ReportID: report.ID,
 	}
 
-	_ = image.Create(imageRepository.gorm)
+	if err := image.Create(imageRepository.gorm); err != nil {
+		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
+			"Success": false,
+			"Message": err.Error(),
+		})
+	}
 
-	fmt.Println("reached here x2")
 	return ctx.Status(http.StatusOK).JSON(fiber.Map{
-		"Success": false,
+		"Success": true,
 		"Message": "Uploaded",
 	})
 

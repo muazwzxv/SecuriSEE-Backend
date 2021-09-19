@@ -26,8 +26,8 @@ type User struct {
 	CreatedAt time.Time      `gorm:"autoUpdateTime" json:"created_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 
+	// Has Many
 	Report []Report `gorm:"foreignKey:UserID"`
-	Image  []Image  `gorm:"foreignKey:UserID"`
 }
 
 const (
@@ -48,7 +48,7 @@ type LoginAdminAndCamera struct {
 }
 
 // Validator
-func (u User) Validate() error {
+func (u User) ValidateCreate() error {
 	return validation.ValidateStruct(&u,
 		validation.Field(&u.Ic, validation.Required),
 		validation.Field(&u.Name, validation.Required),
@@ -66,6 +66,13 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 // CRUD Queries
+func (u *User) Update(gorm *gorm.DB, toUpdate User) error {
+	if err := gorm.Debug().Model(u).Select("*").Omit("ic", "role", "name", "password").Updates(toUpdate).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func (u *User) Create(gorm *gorm.DB) error {
 	if err := gorm.Debug().Create(u).Error; err != nil {
 		return err

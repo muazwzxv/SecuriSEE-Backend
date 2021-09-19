@@ -18,13 +18,19 @@ type Report struct {
 	Lat         float64   `gorm:"type:decimal(10,8)" json:"lat"`
 	Lng         float64   `gorm:"type:decimal(11,8)" json:"lng"`
 	FileName    string    `json:"fileName"`
+	Status      string    `gorm:"not null" json:"status"`
 
 	CreatedAt time.Time      `gorm:"autoUpdateTime" json:"created_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 
-	// relationship
-	User User
+	// Has one
+	Image Image `gorm:"foreignKey:ReportID"`
 }
+
+const (
+	OPEN        = "open"
+	ACKNOWLEDGE = "acknowledge"
+)
 
 // Gorm hooks
 func (r Report) Validate() error {
@@ -33,7 +39,6 @@ func (r Report) Validate() error {
 		validation.Field(&r.UserID, validation.Required),
 		validation.Field(&r.Lat, validation.Required),
 		validation.Field(&r.Lng, validation.Required),
-		validation.Field(&r.UserID, validation.Required),
 		//validation.Field(&r.FileName, validation.Required),
 	)
 }

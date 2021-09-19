@@ -152,7 +152,7 @@ func (userRepository *UserRepository) CreateUser(ctx *fiber.Ctx) error {
 	}
 
 	// validate payload
-	if err := user.Validate(); err != nil {
+	if err := user.ValidateCreate(); err != nil {
 		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"Success": false,
 			"Message": err.Error(),
