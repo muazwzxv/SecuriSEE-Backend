@@ -59,3 +59,18 @@ func (objectStorage *ObjectStorageInstance) UploadFile(fileName string, contentL
 	fmt.Println("put object")
 	return err
 }
+
+func (objectStorage *ObjectStorageInstance) DownloadFile(fileName string, contentLen int64, content io.ReadCloser, metadata map[string]string) error {
+
+	req := objectstorage.GetObjectRequest{
+		NamespaceName: &objectStorage.Namespace,
+		BucketName:    &objectStorage.Bucket,
+		ObjectName:    &fileName,
+	}
+	_, err := objectStorage.Client.GetObject(objectStorage.Context, req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
