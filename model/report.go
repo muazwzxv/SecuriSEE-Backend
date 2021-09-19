@@ -17,7 +17,6 @@ type Report struct {
 	UserID      uuid.UUID `gorm:"column:user_id" json:"user_id"`
 	Lat         float64   `gorm:"type:decimal(10,8)" json:"lat"`
 	Lng         float64   `gorm:"type:decimal(11,8)" json:"lng"`
-	FileName    string    `json:"fileName"`
 	Status      string    `gorm:"not null" json:"status"`
 
 	CreatedAt time.Time      `gorm:"autoUpdateTime" json:"created_at"`
@@ -33,6 +32,13 @@ const (
 )
 
 // Gorm hooks
+func (r *Report) BeforeCreate(tx *gorm.DB) (err error) {
+	uuid := uuid.NewV4()
+	r.ID = uuid
+	return
+}
+
+// Validator
 func (r Report) Validate() error {
 	return validation.ValidateStruct(&r,
 		validation.Field(&r.Description, validation.Required),
@@ -44,7 +50,6 @@ func (r Report) Validate() error {
 }
 
 // CRUD queries
-
 func (r *Report) Create(gorm *gorm.DB) error {
 	if err := gorm.Debug().Create(r).Error; err != nil {
 		return err
@@ -64,6 +69,13 @@ func (r *Report) GetAll(gorm *gorm.DB, ctx *fiber.Ctx) ([]Report, error) {
 func (r *Report) GetById(gorm *gorm.DB, id string) error {
 	if err := gorm.Debug().Where("id = ?", id).Find(r).Error; err != nil {
 		return err
+	}
+	return nil
+}
+
+func (r *Report) GetAssociateImage(gorm *gorm.DB, image *Image) error {
+	if err := gorm.Debug().Model(r).Association("Images").Find(image).Error; err != nil {
+		return nil
 	}
 	return nil
 }

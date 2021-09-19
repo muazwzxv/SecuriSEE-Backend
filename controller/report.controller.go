@@ -65,9 +65,70 @@ func (reportRepository *ReportRepository) Create(ctx *fiber.Ctx) error {
 }
 
 func (reportRepository *ReportRepository) GetAll(ctx *fiber.Ctx) error {
-	return nil
+
+	// validate role
+	claim := util.GetClaims(ctx)
+	var user model.User
+	user.GetUserById(reportRepository.gorm, claim["ID"].(string))
+
+	// Check permissions
+	if isAdmin := user.IsRoleExist("admin"); !isAdmin {
+		return ctx.Status(http.StatusForbidden).JSON(fiber.Map{
+			"Success": false,
+			"Message": "Not Allowed",
+		})
+	}
+
+	var report model.Report
+
+	if reports, err := report.GetAll(reportRepository.gorm, ctx); err != nil {
+		return ctx.Status(http.StatusForbidden).JSON(fiber.Map{
+			"Success": false,
+			"Message": err.Error(),
+		})
+	} else {
+		return ctx.Status(http.StatusOK).JSON(fiber.Map{
+			"Success": true,
+			"Reports": reports,
+		})
+	}
 }
 
 func (reportRepository *ReportRepository) GetById(ctx *fiber.Ctx) error {
-	return nil
+	var report model.Report
+	if err := report.GetById(reportRepository.gorm, ctx.Params("id")); err != nil {
+		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
+			"Success": false,
+			"Message": err.Error(),
+		})
+	}
+
+	return ctx.Status(http.StatusOK).JSON(fiber.Map{
+		"Success": true,
+		"Report":  report,
+	})
+}
+
+func (reportRepository *ReportRepository) GetImageFromReport(ctx *fiber.Ctx) error {
+	var report model.Report
+	var image model.Image
+
+	if err := report.GetById(reportRepository.gorm, ctx.Params("id")); err != nil {
+		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
+			"Success": false,
+			"Message": err.Error(),
+		})
+	}
+
+	if err := report.GetAssociateImage(reportRepository.gorm, &image); err != nil {
+		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
+			"Success": false,
+			"Message": err.Error(),
+		})
+	}
+
+	return ctx.Status(http.StatusOK).JSON(fiber.Map{
+		"Success": true,
+		"Image":   image,
+	})
 }
