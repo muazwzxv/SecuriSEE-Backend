@@ -57,7 +57,7 @@ func (authRepository *AuthRepository) LoginAdminAndCamera(ctx *fiber.Ctx) error 
 
 	// Generate jwt token
 	jwt := service.JwtWrapper{
-		SecretKey:    config.CFG.GetJWTSecret(),
+		SecretKey:    config.GetInstance().GetJWTSecret(),
 		Issuer:       "CrimeNow Backend",
 		ExpiredHours: 24,
 	}
@@ -110,7 +110,7 @@ func (authRepository *AuthRepository) LoginUser(ctx *fiber.Ctx) error {
 
 	// Generate jwt token
 	jwt := service.JwtWrapper{
-		SecretKey:    config.CFG.GetJWTSecret(),
+		SecretKey:    config.GetInstance().GetJWTSecret(),
 		Issuer:       "CrimeNow Backend",
 		ExpiredHours: 24,
 	}

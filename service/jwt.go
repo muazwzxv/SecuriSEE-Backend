@@ -51,7 +51,7 @@ func (j *JwtWrapper) VerifyToken(token string) (jwt.MapClaims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(config.CFG.GetJWTSecret()), nil
+		return []byte(config.GetInstance().GetJWTSecret()), nil
 	})
 	if err != nil {
 		return nil, err

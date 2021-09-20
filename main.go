@@ -34,9 +34,6 @@ func main() {
 	fmt.Println("Application boot up")
 	app := fiber.New()
 
-	// load configuration file
-	config.New()
-
 	// Connect to database
 	gorm := service.ConnectDatabase()
 
@@ -111,6 +108,6 @@ func JwtMiddleware() fiber.Handler {
 				"Error":   e.Error(),
 			})
 		},
-		SigningKey: []byte(config.CFG.GetJWTSecret()),
+		SigningKey: []byte(config.GetInstance().GetJWTSecret()),
 	})
 }

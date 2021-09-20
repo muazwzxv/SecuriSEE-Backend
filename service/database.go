@@ -14,7 +14,7 @@ type GormInstance struct {
 }
 
 func ConnectDatabase() *GormInstance {
-	config := config.CFG.FetchDatabaseConfig()
+	config := config.GetInstance().FetchDatabaseConfig()
 	dsn := fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
 		config.User,
 		config.Password,
