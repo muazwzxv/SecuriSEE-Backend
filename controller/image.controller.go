@@ -4,6 +4,9 @@ import (
 	"Oracle-Hackathon-BE/model"
 	"Oracle-Hackathon-BE/service"
 	"Oracle-Hackathon-BE/util"
+	"bytes"
+	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -13,6 +16,14 @@ import (
 type ImageRepository struct {
 	StorageClient *service.ObjectStorageInstance
 	gorm          *gorm.DB
+	File          *multipart.FileHeader
+}
+type downloadPart struct {
+	size     int64
+	partBody []byte
+	// offset   int64
+	// partNum  int
+	// err      error
 }
 
 func NewImageRepository(db *gorm.DB) *ImageRepository {
@@ -20,6 +31,34 @@ func NewImageRepository(db *gorm.DB) *ImageRepository {
 	return &ImageRepository{
 		StorageClient: objectStorage,
 		gorm:          db,
+	}
+}
+
+func (imageRepository *ImageRepository) Download(ctx *fiber.Ctx) error {
+	var image model.Image
+
+	if err := image.GetById(imageRepository.gorm, ctx.Params("imageId")); err != nil {
+		return ctx.Status(http.StatusNotFound).JSON(fiber.Map{
+			"Success": false,
+			"Message": err.Error(),
+		})
+	}
+
+	if res, err := imageRepository.StorageClient.DownloadFile(image.FileName); err != nil {
+		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
+			"Success": false,
+			"Message": err.Error(),
+		})
+	} else {
+		content, _ := ioutil.ReadAll(res.Content)
+		// download := downloadPart{
+		// 	size:     int64(len(content)),
+		// 	partBody: content,
+		// }
+
+		ctx.Set("Content-Type", "multipart/form-data")
+		//return ctx.SendStream(bytes.NewReader(content))
+		return ctx.Status(http.StatusOK).SendStream(bytes.NewReader(content))
 	}
 }
 

@@ -26,6 +26,8 @@ type User struct {
 	CreatedAt time.Time      `gorm:"autoUpdateTime" json:"created_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 
+	// Relations
+
 	// Has Many
 	Reports []Report `gorm:"foreignKey:UserID"`
 }

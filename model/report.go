@@ -22,7 +22,9 @@ type Report struct {
 	CreatedAt time.Time      `gorm:"autoUpdateTime" json:"created_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 
-	// Has one
+	// Relations
+
+	// HasOne
 	Image Image `gorm:"foreignKey:ReportID"`
 }
 
