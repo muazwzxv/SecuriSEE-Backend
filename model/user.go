@@ -27,7 +27,7 @@ type User struct {
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 
 	// Has Many
-	Report []Report `gorm:"foreignKey:UserID"`
+	Reports []Report `gorm:"foreignKey:UserID"`
 }
 
 const (
