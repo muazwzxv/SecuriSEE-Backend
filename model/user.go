@@ -109,6 +109,16 @@ func (u *User) GetAll(gorm *gorm.DB, ctx *fiber.Ctx) ([]User, error) {
 	return user, nil
 }
 
+func (u *User) GetAssociateReports(gorm *gorm.DB) ([]Report, error) {
+	var reports []Report
+
+	if err := gorm.Debug().Model(u).Association("Reports").Find(reports); err != nil {
+		return nil, err
+	}
+	return reports, nil
+
+}
+
 // Scope wrapper
 func selectUser(db *gorm.DB) *gorm.DB {
 	return db.Select("id", "ic", "name", "phone", "email", "role", "created_at", "deleted_at")

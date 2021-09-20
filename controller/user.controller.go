@@ -194,3 +194,26 @@ func (userRepository *UserRepository) CreateUser(ctx *fiber.Ctx) error {
 	})
 
 }
+
+func (userRepository *UserRepository) GetUserReports(ctx *fiber.Ctx) error {
+	var user model.User
+
+	if err := user.GetUserById(userRepository.gorm, ctx.Params("id")); err != nil {
+		return ctx.Status(http.StatusNotFound).JSON(fiber.Map{
+			"Success": false,
+			"Message": err.Error(),
+		})
+	}
+
+	if reports, err := user.GetAssociateReports(userRepository.gorm); err != nil {
+		return ctx.Status(http.StatusNotFound).JSON(fiber.Map{
+			"Success": false,
+			"Message": err.Error(),
+		})
+	} else {
+		return ctx.Status(http.StatusOK).JSON(fiber.Map{
+			"Success": true,
+			"reports": reports,
+		})
+	}
+}
