@@ -1,62 +1,64 @@
 package config
 
 import (
-	"log"
+    "log"
 
-	"github.com/spf13/viper"
+    "github.com/spf13/viper"
 )
 
-var CFG Config
+var cfg Config
 
 type Config struct {
-	reader *viper.Viper
+    reader *viper.Viper
 }
 
-func New() Config {
+func new() Config {
+    reader := viper.New()
+    reader.AddConfigPath("./")
+    reader.SetConfigFile("config.yml")
 
-	if CFG.reader == nil {
+    if err := reader.ReadInConfig(); err != nil {
+        log.Fatalf("Error while reading config file %s", err)
+    }
 
-		viper := viper.New()
-		viper.AddConfigPath("./")
-		viper.SetConfigFile("config.yml")
-
-		if err := viper.ReadInConfig(); err != nil {
-			log.Fatalf("Error while reading config file %s", err)
-		}
-
-		CFG = Config{reader: viper}
-	}
-
-	return CFG
+    return Config{reader}
 }
 
 // Return global instance
-func (c *Config) GetInstance() Config {
-	return CFG
+func GetInstance() *Config {
+    if !cfg.isInstantiated() {
+        cfg = new()
+    }
+
+    return &cfg
 }
 
 func (c *Config) readEnv(key string) string {
-	return CFG.reader.GetString(key)
+    return c.reader.GetString(key)
 }
 
 func (c *Config) FetchDatabaseConfig() *DatabaseConfig {
 
-	port := CFG.reader.GetInt("Development.Database.Port")
+    port := c.reader.GetInt("Development.Database.Port")
 
-	return &DatabaseConfig{
-		User:         CFG.readEnv("Development.Database.User"),
-		Password:     CFG.readEnv("Development.Database.Password"),
-		Host:         CFG.readEnv("Development.Database.Host"),
-		DatabaseName: CFG.readEnv("Development.Database.Name"),
-		Port:         port,
-	}
+    return &DatabaseConfig{
+        User:         c.readEnv("Development.Database.User"),
+        Password:     c.readEnv("Development.Database.Password"),
+        Host:         c.readEnv("Development.Database.Host"),
+        DatabaseName: c.readEnv("Development.Database.Name"),
+        Port:         port,
+    }
 
 }
 
 func (c *Config) GetJWTSecret() string {
-	return CFG.reader.GetString("JWT.Secret")
+    return c.reader.GetString("JWT.Secret")
 }
 
 func (c *Config) GetBucketName() string {
-	return CFG.reader.GetString("Oracle.BucketName")
+    return c.reader.GetString("Oracle.BucketName")
+}
+
+func (c *Config) isInstantiated() bool {
+    return c.reader != nil
 }
