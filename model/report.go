@@ -83,8 +83,11 @@ func (r *Report) GetById(gorm *gorm.DB, id string) error {
 // }
 
 func (r *Report) GetAssociateImage(gorm *gorm.DB, image *Image) error {
-	if err := gorm.Debug().Joins("Image").Find(r); err != nil {
+	if err := gorm.Debug().Model(r).Joins("left join images on images.report_id  = reports.id").Error; err != nil {
 		return nil
 	}
 	return nil
 }
+
+//db.Model(&User{}).Select("users.name, emails.email").Joins("left join emails on emails.user_id = users.id").Scan(&result{})
+// SELECT users.name, emails.email FROM `users` left join emails on emails.user_id = users.id
