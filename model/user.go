@@ -156,6 +156,10 @@ func (u *User) CheckHash(pass string) bool {
 	return err == nil
 }
 
+func (u *User) IsAdmin() bool {
+  return u.IsRoleExist("admin")
+}
+
 func (u *User) IsRoleExist(role string) bool {
 
 	split := strings.Split(u.Role, ",")
