@@ -31,18 +31,18 @@ func ValidateAdminCamera(u model.User) error {
 func (r *AuthRepository) LoginAdminAndCamera(ctx *fiber.Ctx) error {
 	var login model.LoginAdminAndCamera
 	if err := ctx.BodyParser(&login); err != nil {
-    return BadRequest(ctx, err.Error(), err)
+		return BadRequest(ctx, err.Error(), err)
 	}
 
 	// Get User by Email
 	var user model.User
 	if err := user.GetUserByEmail(r.gorm, login.Email); err != nil {
-    return BadRequest(ctx, err.Error(), err)
+		return BadRequest(ctx, err.Error(), err)
 	}
 
 	// Check password
 	if isMatch := user.CheckHash(login.Password); !isMatch {
-    return BadRequest(ctx, "Password does not match", nil)
+		return BadRequest(ctx, "Password does not match", nil)
 	}
 
 	// Generate jwt token
@@ -59,9 +59,9 @@ func (r *AuthRepository) LoginAdminAndCamera(ctx *fiber.Ctx) error {
 	}
 
 	if token, err := jwt.GenerateToken(payload); err != nil {
-    return BadRequest(ctx, err.Error(), err)
+		return BadRequest(ctx, err.Error(), err)
 	} else {
-    return Ok(ctx, "Successfully logged in", token)
+		return Ok(ctx, "Successfully logged in", token)
 	}
 }
 
@@ -69,18 +69,18 @@ func (r *AuthRepository) LoginUser(ctx *fiber.Ctx) error {
 
 	var login model.LoginUser
 	if err := ctx.BodyParser(&login); err != nil {
-    return BadRequest(ctx, err.Error(), nil)
+		return BadRequest(ctx, err.Error(), nil)
 	}
 
 	// Get User by IC
 	var user model.User
 	if err := user.GetUserByIc(r.gorm, login.IC); err != nil {
-    return BadRequest(ctx, err.Error(), nil)
+		return BadRequest(ctx, err.Error(), nil)
 	}
 
 	// Check password
 	if isMatch := user.CheckHash(login.Password); !isMatch {
-    return BadRequest(ctx, "Password does not match", nil)
+		return BadRequest(ctx, "Password does not match", nil)
 	}
 
 	// Generate jwt token
@@ -97,8 +97,8 @@ func (r *AuthRepository) LoginUser(ctx *fiber.Ctx) error {
 	}
 
 	if token, err := jwt.GenerateToken(payload); err != nil {
-    return BadRequest(ctx, "Failed to generated token", nil)
+		return BadRequest(ctx, "Failed to generated token", nil)
 	} else {
-    return Ok(ctx, "Successfully logged in", token)
+		return Ok(ctx, "Successfully logged in", token)
 	}
 }

@@ -38,11 +38,11 @@ func (r *ImageRepository) Download(ctx *fiber.Ctx) error {
 	var image model.Image
 
 	if err := image.GetById(r.gorm, ctx.Params("imageId")); err != nil {
-    return NotFound(ctx, err.Error(), err)
+		return NotFound(ctx, err.Error(), err)
 	}
 
 	if res, err := r.StorageClient.DownloadFile(image.FileName); err != nil {
-    return Conflict(ctx, err.Error(), err)
+		return Conflict(ctx, err.Error(), err)
 	} else {
 		content, _ := ioutil.ReadAll(res.Content)
 		// download := downloadPart{
@@ -64,29 +64,29 @@ func (r *ImageRepository) Upload(ctx *fiber.Ctx) error {
 
 	// Check permissions
 	if !user.IsRoleUser() && !user.IsRoleAdmin() {
-    return Forbidden(ctx, "Not allowed", nil)
+		return Forbidden(ctx, "Not allowed", nil)
 	}
 
 	// Handle file
 	file, err := ctx.FormFile("image")
 	if err != nil {
-    return Conflict(ctx, err.Error(), nil)
+		return Conflict(ctx, err.Error(), nil)
 	}
 
 	getFile, err := file.Open()
 	if err != nil {
-    return Forbidden(ctx, err.Error(), nil)
+		return Forbidden(ctx, err.Error(), nil)
 	}
 
 	// Validate report
 	var report model.Report
 	if err := report.GetById(r.gorm, ctx.Params("reportId")); err != nil {
-    return Conflict(ctx, "Failed to fetch associate report", nil)
+		return Conflict(ctx, "Failed to fetch associate report", nil)
 	}
 
 	// Upload to object storage
 	if err := r.StorageClient.UploadFile(file.Filename, file.Size, getFile, nil); err != nil {
-    return Conflict(ctx, err.Error(), nil)
+		return Conflict(ctx, err.Error(), nil)
 	}
 
 	image := model.Image{
@@ -95,8 +95,8 @@ func (r *ImageRepository) Upload(ctx *fiber.Ctx) error {
 	}
 
 	if err := image.Create(r.gorm); err != nil {
-    return Conflict(ctx, err.Error(), nil)
+		return Conflict(ctx, err.Error(), nil)
 	}
 
-  return Ok(ctx, "Image successfully uploaded", image)
+	return Ok(ctx, "Image successfully uploaded", image)
 }
