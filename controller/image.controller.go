@@ -91,7 +91,7 @@ func (r *ImageRepository) Upload(ctx *fiber.Ctx) error {
 
 	image := model.Image{
 		FileName: file.Filename,
-		ReportID: report.ID,
+		ReportID: report.ID.String(),
 	}
 
 	if err := image.Create(r.gorm); err != nil {

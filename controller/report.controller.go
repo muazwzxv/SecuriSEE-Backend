@@ -34,7 +34,7 @@ func (r *ReportRepository) Create(ctx *fiber.Ctx) error {
 	}
 
 	// Assign reference id
-	report.UserID = user.ID
+	report.UserID = user.ID.String()
 
 	if err := report.Validate(); err != nil {
 		return BadRequest(ctx, err.Error(), err)

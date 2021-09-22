@@ -12,7 +12,7 @@ type Image struct {
 	ID       uuid.UUID `gorm:"type:char(36);primary_key" json:"id"`
 	FileName string    `gorm:"not null" json:"file_name"`
 
-	ReportID uuid.UUID `gorm:"column:report_id" json:"report_id"`
+	ReportID string `gorm:"column:report_id" json:"report_id"`
 
 	CreatedAt time.Time      `gorm:"autoUpdateTime" json:"created_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`
