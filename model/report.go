@@ -75,8 +75,15 @@ func (r *Report) GetById(gorm *gorm.DB, id string) error {
 	return nil
 }
 
+// func (r *Report) GetAssociateImage(gorm *gorm.DB, image *Image) error {
+// 	if err := gorm.Debug().Model(r).Association("Image").Find(image).Error; err != nil {
+// 		return nil
+// 	}
+// 	return nil
+// }
+
 func (r *Report) GetAssociateImage(gorm *gorm.DB, image *Image) error {
-	if err := gorm.Debug().Model(r).Association("Image").Find(image).Error; err != nil {
+	if err := gorm.Debug().Joins("Image").Find(r); err != nil {
 		return nil
 	}
 	return nil

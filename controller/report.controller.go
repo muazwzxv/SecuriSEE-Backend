@@ -3,6 +3,7 @@ package controller
 import (
 	"Oracle-Hackathon-BE/model"
 	"Oracle-Hackathon-BE/util"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -109,5 +110,6 @@ func (r *ReportRepository) GetImageFromReport(ctx *fiber.Ctx) error {
 		return Conflict(ctx, err.Error(), nil)
 	}
 
-	return Ok(ctx, "Image found", image)
+	fmt.Println(image)
+	return Ok(ctx, "Report with image", report)
 }
