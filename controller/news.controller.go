@@ -3,7 +3,6 @@ package controller
 import (
 	"Oracle-Hackathon-BE/model"
 	"Oracle-Hackathon-BE/util"
-	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -17,79 +16,51 @@ func NewNewsRepository(db *gorm.DB) *NewsRepository {
 	return &NewsRepository{gorm: db}
 }
 
-func (newsRepository *NewsRepository) Create(ctx *fiber.Ctx) error {
+func (r *NewsRepository) Create(ctx *fiber.Ctx) error {
 	// validate role
 	claim := util.GetClaims(ctx)
 	var user model.User
-	user.GetUserById(newsRepository.gorm, claim["ID"].(string))
+	user.GetUserById(r.gorm, claim["ID"].(string))
 
 	// Check permissions
-	if isAdmin := user.IsRoleExist("admin"); !isAdmin {
-		return ctx.Status(http.StatusForbidden).JSON(fiber.Map{
-			"Success": false,
-			"Message": "Not Allowed",
-		})
+	if !user.IsRoleAdmin() {
+    return Forbidden(ctx, "Not allowed", nil)
 	}
 
 	// parse json
 	var news model.News
 	if err := ctx.BodyParser(&news); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Message": "Cannot parse JSON",
-		})
+    return BadRequest(ctx, "Cannot parse JSON", err)
 	}
 
 	// Validate json
 	if err := news.Validate(); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Message": err.Error(),
-		})
+    return BadRequest(ctx, err.Error(), err)
 	}
 
 	// Create
-	if err := news.Create(newsRepository.gorm); err != nil {
-		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
-			"Success": false,
-			"Message": err.Error(),
-		})
+	if err := news.Create(r.gorm); err != nil {
+    return Conflict(ctx, err.Error(), err)
 	}
 
-	return ctx.Status(http.StatusCreated).JSON(fiber.Map{
-		"Success": true,
-		"Message": "Entry created",
-		"news":    news,
-	})
+  return Created(ctx, "News entry created", news)
 }
 
-func (newsRepository *NewsRepository) GetAll(ctx *fiber.Ctx) error {
+func (r *NewsRepository) GetAll(ctx *fiber.Ctx) error {
 	var n model.News
 
-	if news, err := n.GetAll(newsRepository.gorm, ctx); err != nil {
-		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
-			"Success": true,
-			"Message": err.Error(),
-		})
+	if news, err := n.GetAll(r.gorm, ctx); err != nil {
+    return Conflict(ctx, err.Error(), err)
 	} else {
-		return ctx.Status(http.StatusOK).JSON(fiber.Map{
-			"Success": true,
-			"News":    news,
-		})
+    return Ok(ctx, "Successfully get all news", news)
 	}
 }
 
-func (newsRepository *NewsRepository) GetById(ctx *fiber.Ctx) error {
+func (r *NewsRepository) GetById(ctx *fiber.Ctx) error {
 	var news model.News
-	if err := news.GetById(newsRepository.gorm, ctx.Params("id")); err != nil {
-		return ctx.Status(http.StatusNotFound).JSON(fiber.Map{
-			"Success": false,
-			"Error":   err.Error(),
-		})
+	if err := news.GetById(r.gorm, ctx.Params("id")); err != nil {
+    return NotFound(ctx, err.Error(), err)
 	}
 
-	return ctx.Status(http.StatusOK).JSON(fiber.Map{
-		"Success": true,
-		"News":    news,
-	})
+  return Ok(ctx, "Found news", news)
 }
