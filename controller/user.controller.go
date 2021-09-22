@@ -18,80 +18,52 @@ func NewUserController(db *gorm.DB) *UserRepository {
 	return &UserRepository{gorm: db}
 }
 
-func (userRepository *UserRepository) GetAll(ctx *fiber.Ctx) error {
+func (r *UserRepository) GetAll(ctx *fiber.Ctx) error {
 	claim := util.GetClaims(ctx)
 
 	var user model.User
-	user.GetUserById(userRepository.gorm, claim["ID"].(string))
+	user.GetUserById(r.gorm, claim["ID"].(string))
 
 	// Check permissions
-	if isAdmin := user.IsRoleExist("admin"); !isAdmin {
-		return ctx.Status(http.StatusForbidden).JSON(fiber.Map{
-			"Success": false,
-			"Message": "Not Allowed",
-		})
+	if !user.IsRoleAdmin() {
+		return Forbidden(ctx, "Not allowed", nil)
 	}
 
-	if users, err := user.GetAll(userRepository.gorm, ctx); err != nil {
-		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
-			"Success": true,
-			"Message": err.Error(),
-		})
+	if users, err := user.GetAll(r.gorm, ctx); err != nil {
+		return Error(ctx, err.Error(), nil, http.StatusConflict)
 	} else {
-		return ctx.Status(http.StatusOK).JSON(fiber.Map{
-			"Success": true,
-			"User":    users,
-		})
+		return Ok(ctx, "Successfully get all users", users)
 	}
 }
 
-func (userRepository *UserRepository) GetByID(ctx *fiber.Ctx) error {
+func (r *UserRepository) GetByID(ctx *fiber.Ctx) error {
 	var user model.User
-	if err := user.GetUserById(userRepository.gorm, ctx.Params("id")); err != nil {
-		return ctx.Status(http.StatusNotFound).JSON(fiber.Map{
-			"Success": false,
-			"Error":   err.Error(),
-		})
+	if err := user.GetUserById(r.gorm, ctx.Params("id")); err != nil {
+		return NotFound(ctx, "User not found", err)
 	}
 
-	return ctx.Status(http.StatusOK).JSON(fiber.Map{
-		"Success": true,
-		"Message": "User found",
-		"User":    user,
-	})
+	return Ok(ctx, "User found", user)
 }
 
-func (userRepository *UserRepository) Me(ctx *fiber.Ctx) error {
+func (r *UserRepository) Me(ctx *fiber.Ctx) error {
 	var user model.User
 
 	token := ctx.Locals("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 
-	err := user.GetUserById(userRepository.gorm, claims["ID"].(string))
+	err := user.GetUserById(r.gorm, claims["ID"].(string))
 	if err != nil {
-		return ctx.Status(http.StatusNotFound).JSON(fiber.Map{
-			"Success": false,
-			"Message": "User not found",
-			"Error":   err,
-		})
+		return NotFound(ctx, "User not found", err)
 	}
 
-	return ctx.Status(http.StatusOK).JSON(fiber.Map{
-		"Success": true,
-		"Message": "User found",
-		"User":    user,
-	})
-
+	return Ok(ctx, "User found", user)
 }
 
-func (userRepository *UserRepository) CreateAdminOrCamera(ctx *fiber.Ctx) error {
+func (r *UserRepository) CreateAdminOrCamera(ctx *fiber.Ctx) error {
 	var user model.User
 	// Parse json
 	if err := ctx.BodyParser(&user); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Message": "Cannot parse JSON",
-		})
+		return BadRequest(ctx, "Cannot parse JSON", err)
 	}
 
 	// Set Role
@@ -101,48 +73,31 @@ func (userRepository *UserRepository) CreateAdminOrCamera(ctx *fiber.Ctx) error 
 	}
 
 	if err := ValidateAdminCamera(user); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Message": err.Error(),
-		})
+		return BadRequest(ctx, err.Error(), err)
 	}
 
 	// check email exists
-	if cond := user.IsEmailExist(userRepository.gorm); cond == true {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Message": "Email already exists",
-		})
+	if cond := user.IsEmailExist(r.gorm); cond == true {
+		return BadRequest(ctx, "Email already exists", nil)
 	}
 
 	// Hash password
 	user.HashPassword(user.Password)
 
 	// Create user
-	if err := user.Create(userRepository.gorm); err != nil {
-		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
-			"Success": false,
-			"Message": err.Error(),
-		})
+	if err := user.Create(r.gorm); err != nil {
+		return Conflict(ctx, err.Error(), nil)
 	}
 
-	return ctx.Status(http.StatusCreated).JSON(fiber.Map{
-		"Success": true,
-		"Message": "User created",
-		"User":    user,
-	})
-
+	return Created(ctx, "User created", user)
 }
 
-func (userRepository *UserRepository) CreateUser(ctx *fiber.Ctx) error {
+func (r *UserRepository) CreateUser(ctx *fiber.Ctx) error {
 	var user model.User
 
 	// Parse json
 	if err := ctx.BodyParser(&user); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Message": "Cannot parse JSON",
-		})
+		return BadRequest(ctx, "Cannot parse JSON", err)
 	}
 
 	// Set Role
@@ -153,67 +108,41 @@ func (userRepository *UserRepository) CreateUser(ctx *fiber.Ctx) error {
 
 	// validate payload
 	if err := user.ValidateCreate(); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Message": err.Error(),
-		})
+		return BadRequest(ctx, err.Error(), nil)
 	}
 
 	// Check ic exist
-	if cond := user.IsICExist(userRepository.gorm); cond == true {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Message": "IC already exists",
-		})
+	if cond := user.IsICExist(r.gorm); cond == true {
+		return BadRequest(ctx, "IC already exists", nil)
 	}
 
 	// check email exists
-	if cond := user.IsEmailExist(userRepository.gorm); cond == true {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Message": "Email already exists",
-		})
+	if cond := user.IsEmailExist(r.gorm); cond == true {
+		return BadRequest(ctx, "Email already exists", nil)
 	}
 
 	// Hash password
 	user.HashPassword(user.Password)
 
 	// Create user
-	err := user.Create(userRepository.gorm)
+	err := user.Create(r.gorm)
 	if err != nil {
-		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
-			"Success": false,
-			"Message": err.Error(),
-		})
+		return Conflict(ctx, err.Error(), nil)
 	}
 
-	return ctx.Status(http.StatusCreated).JSON(fiber.Map{
-		"Success": true,
-		"Message": "User created",
-		"User":    user,
-	})
-
+	return Created(ctx, "User created", user)
 }
 
-func (userRepository *UserRepository) GetUserReports(ctx *fiber.Ctx) error {
+func (r *UserRepository) GetUserReports(ctx *fiber.Ctx) error {
 	var user model.User
 
-	if err := user.GetUserById(userRepository.gorm, ctx.Params("id")); err != nil {
-		return ctx.Status(http.StatusNotFound).JSON(fiber.Map{
-			"Success": false,
-			"Message": err.Error(),
-		})
+	if err := user.GetUserById(r.gorm, ctx.Params("id")); err != nil {
+		return NotFound(ctx, err.Error(), err)
 	}
 
-	if reports, err := user.GetAssociateReports(userRepository.gorm); err != nil {
-		return ctx.Status(http.StatusNotFound).JSON(fiber.Map{
-			"Success": false,
-			"Message": err.Error(),
-		})
+	if reports, err := user.GetAssociateReports(r.gorm); err != nil {
+		return NotFound(ctx, err.Error(), err)
 	} else {
-		return ctx.Status(http.StatusOK).JSON(fiber.Map{
-			"Success": true,
-			"reports": reports,
-		})
+		return Ok(ctx, "Reports found", reports)
 	}
 }

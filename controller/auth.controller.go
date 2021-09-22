@@ -4,7 +4,6 @@ import (
 	"Oracle-Hackathon-BE/config"
 	"Oracle-Hackathon-BE/model"
 	"Oracle-Hackathon-BE/service"
-	"net/http"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
@@ -29,30 +28,21 @@ func ValidateAdminCamera(u model.User) error {
 	)
 }
 
-func (authRepository *AuthRepository) LoginAdminAndCamera(ctx *fiber.Ctx) error {
+func (r *AuthRepository) LoginAdminAndCamera(ctx *fiber.Ctx) error {
 	var login model.LoginAdminAndCamera
 	if err := ctx.BodyParser(&login); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Error":   err.Error(),
-		})
+		return BadRequest(ctx, err.Error(), err)
 	}
 
 	// Get User by Email
 	var user model.User
-	if err := user.GetUserByEmail(authRepository.gorm, login.Email); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Error":   err.Error(),
-		})
+	if err := user.GetUserByEmail(r.gorm, login.Email); err != nil {
+		return BadRequest(ctx, err.Error(), err)
 	}
 
 	// Check password
 	if isMatch := user.CheckHash(login.Password); !isMatch {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Message": "Password does not match",
-		})
+		return BadRequest(ctx, "Password does not match", nil)
 	}
 
 	// Generate jwt token
@@ -69,43 +59,28 @@ func (authRepository *AuthRepository) LoginAdminAndCamera(ctx *fiber.Ctx) error 
 	}
 
 	if token, err := jwt.GenerateToken(payload); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Message": err.Error(),
-		})
+		return BadRequest(ctx, err.Error(), err)
 	} else {
-		return ctx.Status(http.StatusOK).JSON(fiber.Map{
-			"Success": true,
-			"Token":   token,
-		})
+		return Ok(ctx, "Successfully logged in", token)
 	}
 }
 
-func (authRepository *AuthRepository) LoginUser(ctx *fiber.Ctx) error {
+func (r *AuthRepository) LoginUser(ctx *fiber.Ctx) error {
 
 	var login model.LoginUser
 	if err := ctx.BodyParser(&login); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Error":   err.Error(),
-		})
+		return BadRequest(ctx, err.Error(), nil)
 	}
 
 	// Get User by IC
 	var user model.User
-	if err := user.GetUserByIc(authRepository.gorm, login.IC); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Error":   err.Error(),
-		})
+	if err := user.GetUserByIc(r.gorm, login.IC); err != nil {
+		return BadRequest(ctx, err.Error(), nil)
 	}
 
 	// Check password
 	if isMatch := user.CheckHash(login.Password); !isMatch {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Message": "Password does not match",
-		})
+		return BadRequest(ctx, "Password does not match", nil)
 	}
 
 	// Generate jwt token
@@ -122,14 +97,8 @@ func (authRepository *AuthRepository) LoginUser(ctx *fiber.Ctx) error {
 	}
 
 	if token, err := jwt.GenerateToken(payload); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Message": "Failed to generate token",
-		})
+		return BadRequest(ctx, "Failed to generated token", nil)
 	} else {
-		return ctx.Status(http.StatusOK).JSON(fiber.Map{
-			"Success": true,
-			"Token":   token,
-		})
+		return Ok(ctx, "Successfully logged in", token)
 	}
 }

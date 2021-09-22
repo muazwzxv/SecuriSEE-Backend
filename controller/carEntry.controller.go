@@ -3,7 +3,6 @@ package controller
 import (
 	"Oracle-Hackathon-BE/model"
 	"Oracle-Hackathon-BE/util"
-	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -17,101 +16,67 @@ func NewCarEntryController(db *gorm.DB) *CarEntryRepository {
 	return &CarEntryRepository{gorm: db}
 }
 
-func (carEntryRepository *CarEntryRepository) GetById(ctx *fiber.Ctx) error {
-	var c model.CarEntry
-	if err := c.GetEntryById(carEntryRepository.gorm, ctx.Params("id")); err != nil {
-		return ctx.Status(http.StatusNotFound).JSON(fiber.Map{
-			"Success": false,
-			"Error":   err.Error(),
-		})
+func (r *CarEntryRepository) GetById(ctx *fiber.Ctx) error {
+	var car model.CarEntry
+	if err := car.GetEntryById(r.gorm, ctx.Params("id")); err != nil {
+		return NotFound(ctx, err.Error(), nil)
 	}
 
-	return ctx.Status(http.StatusOK).JSON(fiber.Map{
-		"Success": true,
-		"Car":     c,
-	})
+	return Ok(ctx, "Found car", car)
 }
 
-func (carEntryRepository *CarEntryRepository) GetAll(ctx *fiber.Ctx) error {
+func (r *CarEntryRepository) GetAll(ctx *fiber.Ctx) error {
 	// validate role
 	claim := util.GetClaims(ctx)
 	var user model.User
-	user.GetUserById(carEntryRepository.gorm, claim["ID"].(string))
+	user.GetUserById(r.gorm, claim["ID"].(string))
 
 	// Check permissions
-	if isAdmin := user.IsRoleExist("admin"); !isAdmin {
-		return ctx.Status(http.StatusForbidden).JSON(fiber.Map{
-			"Success": false,
-			"Message": "Not Allowed",
-		})
+	if !user.IsRoleAdmin() {
+		return Forbidden(ctx, "Not allowed", nil)
 	}
 
 	var car model.CarEntry
-	if cars, err := car.GetAll(carEntryRepository.gorm, ctx); err != nil {
-		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
-			"Success": true,
-			"Message": err.Error(),
-		})
+	if cars, err := car.GetAll(r.gorm, ctx); err != nil {
+		return Conflict(ctx, err.Error(), nil)
 	} else {
-		return ctx.Status(http.StatusOK).JSON(fiber.Map{
-			"Success": true,
-			"Cars":    cars,
-		})
+		return Ok(ctx, "Successfully get all cars", cars)
 	}
 }
 
-func (carEntryRepository *CarEntryRepository) CreateEntry(ctx *fiber.Ctx) error {
+func (r *CarEntryRepository) CreateEntry(ctx *fiber.Ctx) error {
 	// validate role
 	claim := util.GetClaims(ctx)
 	var user model.User
-	user.GetUserById(carEntryRepository.gorm, claim["ID"].(string))
+	user.GetUserById(r.gorm, claim["ID"].(string))
 
 	// Check permissions
-	if isCamera := user.IsRoleExist("camera"); !isCamera {
-		return ctx.Status(http.StatusForbidden).JSON(fiber.Map{
-			"Success": false,
-			"Message": "Not Allowed",
-		})
+	if !user.IsRoleCamera() {
+		return Forbidden(ctx, "Not Allowed", nil)
 	}
 
 	var entry model.CarEntry
 
 	// parse json
 	if err := ctx.BodyParser(&entry); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Message": "Cannot parse JSON",
-		})
+		return BadRequest(ctx, "Cannot parse JSON", err)
 	}
 
 	// Validate input
 	if err := entry.Validate(); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Message": err.Error(),
-		})
+		return BadRequest(ctx, err.Error(), err)
 	}
 
 	// validate status provided
 	if err := entry.CheckStatus(); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"Success": false,
-			"Message": err.Error(),
-		})
+		return BadRequest(ctx, err.Error(), err)
 	}
 
 	// Create
-	err := entry.Create(carEntryRepository.gorm)
+	err := entry.Create(r.gorm)
 	if err != nil {
-		return ctx.Status(http.StatusConflict).JSON(fiber.Map{
-			"Success": false,
-			"Message": err.Error(),
-		})
+		return Conflict(ctx, err.Error(), err)
 	}
 
-	return ctx.Status(http.StatusCreated).JSON(fiber.Map{
-		"Success": true,
-		"Message": "Entry created",
-		"entry":   entry,
-	})
+	return Created(ctx, "Car entry created", entry)
 }
