@@ -2,15 +2,9 @@ package controller
 
 import (
 	"net/http"
-  "io"
 
 	"github.com/gofiber/fiber/v2"
 )
-
-// Send a response with status and message.
-func response(ctx *fiber.Ctx, status int, msg fiber.Map) error {
-		return ctx.Status(status).JSON(msg)
-}
 
 // Return `controller.Error()` with `StatusForbidden`(403)
 func Forbidden(ctx *fiber.Ctx, msg string, err error) error {
@@ -32,14 +26,6 @@ func BadRequest(ctx *fiber.Ctx, msg string, err error) error {
   return Error(ctx, msg, err, http.StatusBadRequest)
 }
 
-func Error(ctx *fiber.Ctx, msg string, e error, status int) error {
-  return response(ctx, status, fiber.Map{
-    "success": false,
-    "message": msg,
-    "data": e,
-  })
-}
-
 // Return `controller.Success()` with `StatusCreated`(201) status code
 func Created(ctx *fiber.Ctx, msg string, data interface{}) error {
   return Success(ctx, msg, data, http.StatusCreated)
@@ -50,6 +36,8 @@ func Ok(ctx *fiber.Ctx, msg string, data interface{}) error {
   return Success(ctx, msg, data, http.StatusOK)
 }
 
+// Return response with http status code `status`, and JSON message with
+// success = true, message = `msg`, and data = `data`
 func Success(ctx *fiber.Ctx, msg string, data interface{}, status int) error {
   return response(ctx, http.StatusOK, fiber.Map{
     "success": true,
@@ -58,3 +46,17 @@ func Success(ctx *fiber.Ctx, msg string, data interface{}, status int) error {
   })
 }
 
+// Return response with http status code `status`, and JSON message with
+// success = false, message = `msg`, and data = `e`
+func Error(ctx *fiber.Ctx, msg string, e error, status int) error {
+  return response(ctx, status, fiber.Map{
+    "success": false,
+    "message": msg,
+    "data": e,
+  })
+}
+
+// Send a response with status and message.
+func response(ctx *fiber.Ctx, status int, msg fiber.Map) error {
+		return ctx.Status(status).JSON(msg)
+}
