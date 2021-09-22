@@ -156,7 +156,15 @@ func (u *User) CheckHash(pass string) bool {
 	return err == nil
 }
 
-func (u *User) IsAdmin() bool {
+func (u *User) IsRoleCamera() bool {
+  return u.IsRoleExist("camera")
+}
+
+func (u *User) IsRoleUser() bool {
+  return u.IsRoleExist("user")
+}
+
+func (u *User) IsRoleAdmin() bool {
   return u.IsRoleExist("admin")
 }
 
