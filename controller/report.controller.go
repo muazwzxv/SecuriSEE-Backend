@@ -90,14 +90,14 @@ func (r *ReportRepository) GetById(ctx *fiber.Ctx) error {
 
 func (r *ReportRepository) GetImageFromReport(ctx *fiber.Ctx) error {
 	// validate role
-	claim := util.GetClaims(ctx)
-	var user model.User
-	user.GetUserById(r.gorm, claim["ID"].(string))
+	// claim := util.GetClaims(ctx)
+	// var user model.User
+	// user.GetUserById(r.gorm, claim["ID"].(string))
 
-	// Check permissions
-	if !user.IsRoleAdmin() {
-		return Forbidden(ctx, "Not allowed", nil)
-	}
+	// // Check permissions
+	// if !user.IsRoleAdmin() {
+	// 	return Forbidden(ctx, "Not allowed", nil)
+	// }
 
 	var report model.Report
 	var image model.Image
