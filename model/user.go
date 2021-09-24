@@ -115,7 +115,7 @@ func (u *User) GetAll(gorm *gorm.DB, ctx *fiber.Ctx) ([]User, error) {
 func (u *User) GetAssociateReports(gorm *gorm.DB) ([]Report, error) {
 	var reports []Report
 
-	if err := gorm.Debug().Model(&Report{}).Preload(clause.Associations).Find(&reports).Error; err != nil {
+	if err := gorm.Debug().Model(&Report{}).Preload(clause.Associations).Where("user_id = ?", u.ID).Find(&reports).Error; err != nil {
 		return nil, err
 	}
 	return reports, nil
