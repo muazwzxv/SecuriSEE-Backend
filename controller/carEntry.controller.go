@@ -45,15 +45,15 @@ func (r *CarEntryRepository) GetAll(ctx *fiber.Ctx) error {
 }
 
 func (r *CarEntryRepository) CreateEntry(ctx *fiber.Ctx) error {
-	// validate role
-	claim := util.GetClaims(ctx)
-	var user model.User
-	user.GetUserById(r.gorm, claim["ID"].(string))
+	// // validate role
+	// claim := util.GetClaims(ctx)
+	// var user model.User
+	// user.GetUserById(r.gorm, claim["ID"].(string))
 
-	// Check permissions
-	if !user.IsRoleCamera() {
-		return Forbidden(ctx, "Not Allowed", nil)
-	}
+	// // Check permissions
+	// if !user.IsRoleCamera() {
+	// 	return Forbidden(ctx, "Not Allowed", nil)
+	// }
 
 	var entry model.CarEntry
 
@@ -67,14 +67,13 @@ func (r *CarEntryRepository) CreateEntry(ctx *fiber.Ctx) error {
 		return BadRequest(ctx, err.Error(), err)
 	}
 
-	// validate status provided
-	if err := entry.CheckStatus(); err != nil {
-		return BadRequest(ctx, err.Error(), err)
-	}
+	// // validate status provided
+	// if err := entry.CheckStatus(); err != nil {
+	// 	return BadRequest(ctx, err.Error(), err)
+	// }
 
 	// Create
-	err := entry.Create(r.gorm)
-	if err != nil {
+	if err := entry.Create(r.gorm); err != nil {
 		return Conflict(ctx, err.Error(), err)
 	}
 
