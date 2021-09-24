@@ -2,7 +2,6 @@ package controller
 
 import (
 	"Oracle-Hackathon-BE/model"
-	"Oracle-Hackathon-BE/util"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -27,14 +26,14 @@ func (r *CarEntryRepository) GetById(ctx *fiber.Ctx) error {
 
 func (r *CarEntryRepository) GetAll(ctx *fiber.Ctx) error {
 	// validate role
-	claim := util.GetClaims(ctx)
-	var user model.User
-	user.GetUserById(r.gorm, claim["ID"].(string))
+	// claim := util.GetClaims(ctx)
+	// var user model.User
+	// user.GetUserById(r.gorm, claim["ID"].(string))
 
-	// Check permissions
-	if !user.IsRoleAdmin() {
-		return Forbidden(ctx, "Not allowed", nil)
-	}
+	// // Check permissions
+	// if !user.IsRoleAdmin() {
+	// 	return Forbidden(ctx, "Not allowed", nil)
+	// }
 
 	var car model.CarEntry
 	if cars, err := car.GetAll(r.gorm, ctx); err != nil {
