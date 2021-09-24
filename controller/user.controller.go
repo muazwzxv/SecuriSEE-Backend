@@ -2,11 +2,9 @@ package controller
 
 import (
 	"Oracle-Hackathon-BE/model"
-	"Oracle-Hackathon-BE/util"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v4"
 	"gorm.io/gorm"
 )
 
@@ -19,10 +17,9 @@ func NewUserController(db *gorm.DB) *UserRepository {
 }
 
 func (r *UserRepository) GetAll(ctx *fiber.Ctx) error {
-	claim := util.GetClaims(ctx)
-
+	userId := ctx.Locals("userId").(string)
 	var user model.User
-	user.GetUserById(r.gorm, claim["ID"].(string))
+	user.GetUserById(r.gorm, userId)
 
 	// Check permissions
 	if !user.IsRoleAdmin() {
@@ -46,13 +43,10 @@ func (r *UserRepository) GetByID(ctx *fiber.Ctx) error {
 }
 
 func (r *UserRepository) Me(ctx *fiber.Ctx) error {
+	userId := ctx.Locals("userId").(string)
 	var user model.User
 
-	token := ctx.Locals("user").(*jwt.Token)
-	claims := token.Claims.(jwt.MapClaims)
-
-	err := user.GetUserById(r.gorm, claims["ID"].(string))
-	if err != nil {
+	if err := user.GetUserById(r.gorm, userId); err != nil {
 		return NotFound(ctx, "User not found", err)
 	}
 
@@ -135,7 +129,6 @@ func (r *UserRepository) CreateUser(ctx *fiber.Ctx) error {
 
 func (r *UserRepository) GetUserReports(ctx *fiber.Ctx) error {
 	var user model.User
-
 	if err := user.GetUserById(r.gorm, ctx.Params("id")); err != nil {
 		return NotFound(ctx, err.Error(), err)
 	}

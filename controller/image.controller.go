@@ -3,7 +3,6 @@ package controller
 import (
 	"Oracle-Hackathon-BE/model"
 	"Oracle-Hackathon-BE/service"
-	"Oracle-Hackathon-BE/util"
 	"bytes"
 	"io/ioutil"
 	"mime/multipart"
@@ -58,11 +57,11 @@ func (r *ImageRepository) Download(ctx *fiber.Ctx) error {
 
 func (r *ImageRepository) Upload(ctx *fiber.Ctx) error {
 	// validate role
-	claim := util.GetClaims(ctx)
+	userId := ctx.Locals("userId").(string)
 	var user model.User
-	user.GetUserById(r.gorm, claim["ID"].(string))
 
 	// Check permissions
+	user.GetUserById(r.gorm, userId)
 	if !user.IsRoleUser() && !user.IsRoleAdmin() {
 		return Forbidden(ctx, "Not allowed", nil)
 	}
