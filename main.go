@@ -109,7 +109,8 @@ func JwtMiddleware() fiber.Handler {
 
 			c.Locals("userId", claims["ID"].(string))
 			c.Locals("claims", claims)
-			return nil
+
+			return c.Next()
 		},
 		ErrorHandler: func(c *fiber.Ctx, e error) error {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
