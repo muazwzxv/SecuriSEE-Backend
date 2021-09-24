@@ -5,6 +5,7 @@ import (
 	"Oracle-Hackathon-BE/controller"
 	_ "Oracle-Hackathon-BE/docs/swagger"
 	"Oracle-Hackathon-BE/service"
+	"Oracle-Hackathon-BE/util"
 	"fmt"
 
 	swagger "github.com/arsmn/fiber-swagger/v2"
@@ -103,6 +104,13 @@ func setupRouter(gorm *gorm.DB, app *fiber.App) {
 // Jwt middleware
 func JwtMiddleware() fiber.Handler {
 	return jwtware.New(jwtware.Config{
+		SuccessHandler: func(c *fiber.Ctx) error {
+			claims := util.GetClaims(c)
+
+			c.Locals("userId", claims["ID"].(string))
+			c.Locals("claims", claims)
+			return nil
+		},
 		ErrorHandler: func(c *fiber.Ctx, e error) error {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"Message": "Unauthorized",
