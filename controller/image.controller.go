@@ -51,7 +51,8 @@ func (r *ImageRepository) Download(ctx *fiber.Ctx) error {
 		// }
 
 		//ctx.Set("Content-Type", "image/jpg")
-		ctx.Set("Content-Type", "base64")
+		//ctx.Set("Content-Type", "base64")
+		ctx.Set("Content-Type", "multipart/form-data")
 		return ctx.Status(http.StatusOK).SendStream(bytes.NewReader(content))
 	}
 }
