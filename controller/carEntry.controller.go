@@ -15,6 +15,16 @@ func NewCarEntryController(db *gorm.DB) *CarEntryRepository {
 	return &CarEntryRepository{gorm: db}
 }
 
+func (r *CarEntryRepository) GetByPlate(ctx *fiber.Ctx) error {
+	var car model.CarEntry
+
+	if cars, err := car.GetEntryByPlate(r.gorm, ctx.Params("plateId")); err != nil {
+		return NotFound(ctx, err.Error(), nil)
+	} else {
+		return Ok(ctx, "car found", cars)
+	}
+}
+
 func (r *CarEntryRepository) GetById(ctx *fiber.Ctx) error {
 	var car model.CarEntry
 	if err := car.GetEntryById(r.gorm, ctx.Params("id")); err != nil {
