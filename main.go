@@ -81,9 +81,10 @@ func setupRouter(gorm *gorm.DB, app *fiber.App) {
 	v1.Get("/me", JwtMiddleware(), userRepository.Me)
 
 	carEntryrepository := controller.NewCarEntryController(gorm)
-	v1.Post("/car", carEntryrepository.CreateEntry)
+	v1.Post("/car", JwtMiddleware(), carEntryrepository.CreateEntry)
 	v1.Get("/car", JwtMiddleware(), carEntryrepository.GetAll)
 	v1.Get("/car/:id", JwtMiddleware(), carEntryrepository.GetById)
+	v1.Get("/car/:plate/plate", JwtMiddleware(), carEntryrepository.GetByPlate)
 
 	newsRepository := controller.NewNewsRepository(gorm)
 	v1.Post("/news", JwtMiddleware(), newsRepository.Create)
@@ -92,7 +93,7 @@ func setupRouter(gorm *gorm.DB, app *fiber.App) {
 
 	imageRepository := controller.NewImageRepository(gorm)
 	v1.Post("/image/upload/:reportId", JwtMiddleware(), imageRepository.Upload)
-	v1.Get("/image/download/:imageId", imageRepository.Upload)
+	v1.Get("/image/download/:imageId", JwtMiddleware(), imageRepository.Download)
 
 	reportRepository := controller.NewReportRepository(gorm)
 	v1.Post("/report", JwtMiddleware(), reportRepository.Create)

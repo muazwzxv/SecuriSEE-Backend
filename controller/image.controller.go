@@ -3,10 +3,11 @@ package controller
 import (
 	"Oracle-Hackathon-BE/model"
 	"Oracle-Hackathon-BE/service"
+	"Oracle-Hackathon-BE/util"
 	"bytes"
+	"encoding/base64"
 	"io/ioutil"
 	"mime/multipart"
-	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -49,9 +50,13 @@ func (r *ImageRepository) Download(ctx *fiber.Ctx) error {
 		// 	partBody: content,
 		// }
 
-		ctx.Set("Content-Type", "multipart/form-data")
-		//return ctx.SendStream(bytes.NewReader(content))
-		return ctx.Status(http.StatusOK).SendStream(bytes.NewReader(content))
+		//ctx.Set("Content-Type", "image/jpg")
+		//ctx.Set("Content-Type", "base64")
+		//ctx.Set("Content-Type", "multipart/form-data")
+
+		toBase64 := base64.StdEncoding.EncodeToString(content)
+		return Ok(ctx, "Image successfully download", toBase64)
+		//	return ctx.Status(http.StatusOK).SendStream(bytes.NewReader(content))
 	}
 }
 

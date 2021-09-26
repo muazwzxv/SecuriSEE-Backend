@@ -2,7 +2,6 @@ package model
 
 import (
 	"Oracle-Hackathon-BE/util"
-	"errors"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -20,9 +19,10 @@ const (
 type CarEntry struct {
 	ID uuid.UUID `gorm:"type:char(36);primary_key" json:"id"`
 
-	PlateNumber string `gorm:"not null" json:"plate_number"`
-	City        string `gorm:"not null" json:"city"`
-	Status      string `gorm:"not null" json:"status"`
+	PlateNumber string  `gorm:"not null" json:"plate_number"`
+	Description string  `gorm:"not null" json:"description"`
+	Lat         float64 `gorm:"type:decimal(10,8)" json:"lat"`
+	Lng         float64 `gorm:"type:decimal(11,8)" json:"lng"`
 
 	CreatedAt time.Time      `gorm:"autoUpdateTime" json:"created_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`
@@ -31,8 +31,9 @@ type CarEntry struct {
 func (c CarEntry) Validate() error {
 	return validation.ValidateStruct(&c,
 		validation.Field(&c.PlateNumber, validation.Required),
-		validation.Field(&c.City, validation.Required),
-		//validation.Field(&c.Status, validation.Required),
+		validation.Field(&c.Description, validation.Required),
+		validation.Field(&c.Lat, validation.Required),
+		validation.Field(&c.Lng, validation.Required),
 	)
 }
 
@@ -67,14 +68,10 @@ func (c *CarEntry) GetEntryById(gorm *gorm.DB, id string) error {
 	return nil
 }
 
-// Helpers
-
-func (c *CarEntry) CheckStatus() error {
-	switch {
-	case c.Status == "":
-		return errors.New("include status")
-	case c.Status != OUTBOUND && c.Status != INBOUND:
-		return errors.New("status is not valid")
+func (c *CarEntry) GetEntryByPlate(gorm *gorm.DB, plate string) ([]CarEntry, error) {
+	var car []CarEntry
+	if err := gorm.Debug().Where("plate_number = ?", plate).Find(&car).Error; err != nil {
+		return nil, err
 	}
-	return nil
+	return car, nil
 }
