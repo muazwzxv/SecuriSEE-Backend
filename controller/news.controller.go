@@ -2,7 +2,6 @@ package controller
 
 import (
 	"Oracle-Hackathon-BE/model"
-	"Oracle-Hackathon-BE/util"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -18,9 +17,9 @@ func NewNewsRepository(db *gorm.DB) *NewsRepository {
 
 func (r *NewsRepository) Create(ctx *fiber.Ctx) error {
 	// validate role
-	claim := util.GetClaims(ctx)
+	userId := ctx.Locals("userId").(string)
 	var user model.User
-	user.GetUserById(r.gorm, claim["ID"].(string))
+	user.GetUserById(r.gorm, userId)
 
 	// Check permissions
 	if !user.IsRoleAdmin() {

@@ -35,8 +35,7 @@ func (r *CarEntryRepository) GetById(ctx *fiber.Ctx) error {
 }
 
 func (r *CarEntryRepository) GetAll(ctx *fiber.Ctx) error {
-	// validate role
-	// claim := util.GetClaims(ctx)
+	// userId := ctx.Locals("userId").(string)
 	// var user model.User
 	// user.GetUserById(r.gorm, claim["ID"].(string))
 
@@ -54,10 +53,10 @@ func (r *CarEntryRepository) GetAll(ctx *fiber.Ctx) error {
 }
 
 func (r *CarEntryRepository) CreateEntry(ctx *fiber.Ctx) error {
-	// // validate role
-	// claim := util.GetClaims(ctx)
+	// validate role
+	// userId := ctx.Locals("userId").(string)
 	// var user model.User
-	// user.GetUserById(r.gorm, claim["ID"].(string))
+	// user.GetUserById(r.gorm, userId)
 
 	// // Check permissions
 	// if !user.IsRoleCamera() {

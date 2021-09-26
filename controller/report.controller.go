@@ -2,7 +2,6 @@ package controller
 
 import (
 	"Oracle-Hackathon-BE/model"
-	"Oracle-Hackathon-BE/util"
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
@@ -19,9 +18,9 @@ func NewReportRepository(db *gorm.DB) *ReportRepository {
 
 func (r *ReportRepository) Create(ctx *fiber.Ctx) error {
 	// validate role
-	claim := util.GetClaims(ctx)
+	userId := ctx.Locals("userId").(string)
 	var user model.User
-	user.GetUserById(r.gorm, claim["ID"].(string))
+	user.GetUserById(r.gorm, userId)
 
 	// Check permissions
 	if !user.IsRoleUser() {
@@ -51,9 +50,9 @@ func (r *ReportRepository) Create(ctx *fiber.Ctx) error {
 func (r *ReportRepository) GetAll(ctx *fiber.Ctx) error {
 
 	// validate role
-	claim := util.GetClaims(ctx)
+	userId := ctx.Locals("userId").(string)
 	var user model.User
-	user.GetUserById(r.gorm, claim["ID"].(string))
+	user.GetUserById(r.gorm, userId)
 
 	// Check permissions
 	if !user.IsRoleAdmin() {
@@ -71,9 +70,9 @@ func (r *ReportRepository) GetAll(ctx *fiber.Ctx) error {
 
 func (r *ReportRepository) GetById(ctx *fiber.Ctx) error {
 	// validate role
-	claim := util.GetClaims(ctx)
+	userId := ctx.Locals("userId").(string)
 	var user model.User
-	user.GetUserById(r.gorm, claim["ID"].(string))
+	user.GetUserById(r.gorm, userId)
 
 	// Check permissions
 	if !user.IsRoleAdmin() {
