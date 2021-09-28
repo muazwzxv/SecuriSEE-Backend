@@ -2,6 +2,7 @@ package controller
 
 import (
 	"Oracle-Hackathon-BE/model"
+	"Oracle-Hackathon-BE/service"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -11,8 +12,9 @@ type CarEntryRepository struct {
 	gorm *gorm.DB
 }
 
-func NewCarEntryController(db *gorm.DB) *CarEntryRepository {
-	return &CarEntryRepository{gorm: db}
+func NewCarEntryController() *CarEntryRepository {
+	db := service.GetGormInstance()
+	return &CarEntryRepository{gorm: db.Orm}
 }
 
 func (r *CarEntryRepository) GetByPlate(ctx *fiber.Ctx) error {

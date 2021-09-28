@@ -2,6 +2,7 @@ package controller
 
 import (
 	"Oracle-Hackathon-BE/model"
+	"Oracle-Hackathon-BE/service"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -12,8 +13,9 @@ type UserRepository struct {
 	gorm *gorm.DB
 }
 
-func NewUserController(db *gorm.DB) *UserRepository {
-	return &UserRepository{gorm: db}
+func NewUserController() *UserRepository {
+	db := service.GetGormInstance()
+	return &UserRepository{gorm: db.Orm}
 }
 
 func (r *UserRepository) GetAll(ctx *fiber.Ctx) error {

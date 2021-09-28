@@ -15,8 +15,9 @@ type AuthRepository struct {
 	gorm *gorm.DB
 }
 
-func NewAuthController(db *gorm.DB) *AuthRepository {
-	return &AuthRepository{gorm: db}
+func NewAuthController() *AuthRepository {
+	db := service.GetGormInstance()
+	return &AuthRepository{gorm: db.Orm}
 }
 
 func ValidateAdminCamera(u model.User) error {

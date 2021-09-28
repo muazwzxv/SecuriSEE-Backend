@@ -3,8 +3,9 @@ package controller
 import (
 	"Oracle-Hackathon-BE/model"
 	"Oracle-Hackathon-BE/service"
-	"Oracle-Hackathon-BE/util"
-	"bytes"
+
+	// "Oracle-Hackathon-BE/util"
+	// "bytes"
 	"encoding/base64"
 	"io/ioutil"
 	"mime/multipart"
@@ -26,11 +27,12 @@ type downloadPart struct {
 	// err      error
 }
 
-func NewImageRepository(db *gorm.DB) *ImageRepository {
+func NewImageRepository() *ImageRepository {
+	db := service.GetGormInstance()
 	objectStorage := service.ConnectToObjectStorage()
 	return &ImageRepository{
 		StorageClient: objectStorage,
-		gorm:          db,
+		gorm:          db.Orm,
 	}
 }
 

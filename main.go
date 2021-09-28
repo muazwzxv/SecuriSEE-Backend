@@ -14,7 +14,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	jwtware "github.com/gofiber/jwt/v3"
-	"gorm.io/gorm"
 )
 
 // @title CrimeNow Backend APi
@@ -36,13 +35,16 @@ func main() {
 	app := fiber.New()
 
 	// Connect to database
-	gorm := service.ConnectDatabase()
+	// gorm := service.ConnectDatabase()
+	if err := service.GetGormInstance().Migrate(); err != nil {
+		panic(err)
+	}
 
 	// Setup middleware
 	setupMiddleware(app)
 
 	// Load Routers
-	setupRouter(gorm.Orm, app)
+	setupRouter(app)
 
 	app.Listen(":3000")
 }
@@ -64,10 +66,10 @@ func setupMiddleware(app *fiber.App) {
 
 }
 
-func setupRouter(gorm *gorm.DB, app *fiber.App) {
+func setupRouter(app *fiber.App) {
 	v1 := app.Group("/api")
 
-	userRepository := controller.NewUserController(gorm)
+	userRepository := controller.NewUserController()
 	v1.Post("/user", userRepository.CreateUser)
 	v1.Post("/user/admin", userRepository.CreateAdminOrCamera)
 	v1.Get("/user/:id", JwtMiddleware(), userRepository.GetByID)
@@ -75,27 +77,27 @@ func setupRouter(gorm *gorm.DB, app *fiber.App) {
 	v1.Get("/user/:id/reports", JwtMiddleware(), userRepository.GetUserReports)
 
 	// Auth
-	authRepository := controller.NewAuthController(gorm)
+	authRepository := controller.NewAuthController()
 	v1.Post("/login/user", authRepository.LoginUser)
 	v1.Post("/login/admin", authRepository.LoginAdminAndCamera)
 	v1.Get("/me", JwtMiddleware(), userRepository.Me)
 
-	carEntryrepository := controller.NewCarEntryController(gorm)
+	carEntryrepository := controller.NewCarEntryController()
 	v1.Post("/car", JwtMiddleware(), carEntryrepository.CreateEntry)
 	v1.Get("/car", JwtMiddleware(), carEntryrepository.GetAll)
 	v1.Get("/car/:id", JwtMiddleware(), carEntryrepository.GetById)
 	v1.Get("/car/:plate/plate", JwtMiddleware(), carEntryrepository.GetByPlate)
 
-	newsRepository := controller.NewNewsRepository(gorm)
+	newsRepository := controller.NewNewsRepository()
 	v1.Post("/news", JwtMiddleware(), newsRepository.Create)
 	v1.Get("/news/:id", JwtMiddleware(), newsRepository.GetById)
 	v1.Get("/news", JwtMiddleware(), newsRepository.GetAll)
 
-	imageRepository := controller.NewImageRepository(gorm)
+	imageRepository := controller.NewImageRepository()
 	v1.Post("/image/upload/:reportId", JwtMiddleware(), imageRepository.Upload)
 	v1.Get("/image/download/:imageId", JwtMiddleware(), imageRepository.Download)
 
-	reportRepository := controller.NewReportRepository(gorm)
+	reportRepository := controller.NewReportRepository()
 	v1.Post("/report", JwtMiddleware(), reportRepository.Create)
 	v1.Get("/report", JwtMiddleware(), reportRepository.GetAll)
 	v1.Get("/report/:id", JwtMiddleware(), reportRepository.GetById)

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"Oracle-Hackathon-BE/model"
+	"Oracle-Hackathon-BE/service"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -11,8 +12,9 @@ type NewsRepository struct {
 	gorm *gorm.DB
 }
 
-func NewNewsRepository(db *gorm.DB) *NewsRepository {
-	return &NewsRepository{gorm: db}
+func NewNewsRepository() *NewsRepository {
+	db := service.GetGormInstance()
+	return &NewsRepository{gorm: db.Orm}
 }
 
 func (r *NewsRepository) Create(ctx *fiber.Ctx) error {

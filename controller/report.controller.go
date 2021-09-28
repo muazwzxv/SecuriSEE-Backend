@@ -2,6 +2,7 @@ package controller
 
 import (
 	"Oracle-Hackathon-BE/model"
+	"Oracle-Hackathon-BE/service"
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
@@ -12,8 +13,9 @@ type ReportRepository struct {
 	gorm *gorm.DB
 }
 
-func NewReportRepository(db *gorm.DB) *ReportRepository {
-	return &ReportRepository{gorm: db}
+func NewReportRepository() *ReportRepository {
+	db := service.GetGormInstance()
+	return &ReportRepository{gorm: db.Orm}
 }
 
 func (r *ReportRepository) Create(ctx *fiber.Ctx) error {
