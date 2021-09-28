@@ -51,6 +51,10 @@ func (c *Config) FetchDatabaseConfig() *DatabaseConfig {
 
 }
 
+func (c *Config) FetchServerPort() uint64 {
+	return c.reader.GetUint64("Server.Port")
+}
+
 func (c *Config) GetJWTSecret() string {
 	return c.reader.GetString("JWT.Secret")
 }

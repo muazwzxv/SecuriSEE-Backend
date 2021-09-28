@@ -7,6 +7,10 @@ import (
 	"Oracle-Hackathon-BE/service"
 	"Oracle-Hackathon-BE/util"
 	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	swagger "github.com/arsmn/fiber-swagger/v2"
 	"github.com/gofiber/fiber/v2"
@@ -44,9 +48,30 @@ func main() {
 	setupMiddleware(app)
 
 	// Load Routers
+
 	setupRouter(app)
 
-	app.Listen(":3000")
+	go func() {
+		if err := app.Listen(fmt.Sprintf(":%d", config.GetInstance().FetchServerPort())); err != nil {
+			log.Panic(err)
+		}
+	}()
+
+	c := make(chan os.Signal, 1)
+
+	// Notify channel if interrup or termination signal is sent
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	_ = <-c // Block main thread until interrupt is received
+	fmt.Println("Gracefully shutting down ....")
+	_ = app.Shutdown()
+
+	fmt.Println("Cleaning up task ........")
+
+	service.GetGormInstance().GormShutDown()
+
+	fmt.Println("Shitdown Complete !")
+
 }
 
 func setupMiddleware(app *fiber.App) {

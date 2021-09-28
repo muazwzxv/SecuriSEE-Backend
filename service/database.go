@@ -50,10 +50,19 @@ func (g *GormInstance) isInstantiated() bool {
 	return g.Orm != nil
 }
 
+func (g *GormInstance) GormShutDown() error {
+
+	if sql, err := g.Orm.DB(); err != nil {
+		return err
+	} else {
+		sql.Close()
+		return nil
+	}
+}
+
 func (g *GormInstance) Migrate() error {
 
 	if err := g.Orm.Debug().AutoMigrate(
-
 		&model.User{},
 		&model.Report{},
 		&model.News{},
